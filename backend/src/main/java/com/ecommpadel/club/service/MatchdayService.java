@@ -7,6 +7,8 @@ import com.ecommpadel.club.model.Matchday;
 import com.ecommpadel.club.model.MatchResult;
 import com.ecommpadel.club.model.PlayerResponse;
 import com.ecommpadel.club.repository.MatchdayRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +16,8 @@ import java.util.NoSuchElementException;
 
 @Service
 public class MatchdayService {
+
+    private static final Logger log = LoggerFactory.getLogger(MatchdayService.class);
 
     private final MatchdayRepository matchdayRepository;
 
@@ -33,24 +37,32 @@ public class MatchdayService {
 
     public Matchday findById(String id) {
         return matchdayRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Matchday not found: " + id));
+                .orElseThrow(() -> {
+                    log.warn("Matchday not found: {}", id);
+                    return new NoSuchElementException("Matchday not found: " + id);
+                });
     }
 
     public Matchday create(MatchdayRequest request) {
         Matchday matchday = new Matchday();
         applyRequest(matchday, request);
-        return matchdayRepository.save(matchday);
+        Matchday saved = matchdayRepository.save(matchday);
+        log.info("Matchday created: id={}, title={}", saved.getId(), saved.getTitle());
+        return saved;
     }
 
     public Matchday update(String id, MatchdayRequest request) {
         Matchday matchday = findById(id);
         applyRequest(matchday, request);
-        return matchdayRepository.save(matchday);
+        Matchday saved = matchdayRepository.save(matchday);
+        log.info("Matchday updated: id={}", id);
+        return saved;
     }
 
     public void delete(String id) {
         findById(id);
         matchdayRepository.deleteById(id);
+        log.info("Matchday deleted: id={}", id);
     }
 
     public Matchday registerResponse(String id, ResponseRequest request) {
@@ -66,6 +78,8 @@ public class MatchdayService {
                 request.getAvailability()
         );
         matchday.getRegistrations().add(response);
+        log.info("Player response registered: matchdayId={}, playerId={}, availability={}",
+                id, request.getPlayerId(), request.getAvailability());
 
         return matchdayRepository.save(matchday);
     }
@@ -81,6 +95,7 @@ public class MatchdayService {
         );
         matchday.setMatchResult(result);
         matchday.setStatus(Matchday.Status.PLAYED);
+        log.info("Match result registered: matchdayId={}", id);
 
         return matchdayRepository.save(matchday);
     }
@@ -88,6 +103,7 @@ public class MatchdayService {
     public Matchday close(String id) {
         Matchday matchday = findById(id);
         matchday.setStatus(Matchday.Status.CLOSED);
+        log.info("Matchday closed: id={}", id);
         return matchdayRepository.save(matchday);
     }
 

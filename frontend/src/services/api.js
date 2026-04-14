@@ -41,13 +41,10 @@ export const closeMatchday = (id, pin) =>
   request(`/matchdays/${id}/close`, { method: 'POST', headers: { 'X-Admin-Pin': pin } })
 
 export const verifyAdminPin = async (pin) => {
-  // Create a dummy matchday to test PIN — actually validate by calling a protected endpoint
-  // We use a lightweight check: try close on a non-existent id; 404 means PIN is OK, 401 means wrong
   try {
-    await request('/matchdays/__pin_check__/close', { method: 'POST', headers: { 'X-Admin-Pin': pin } })
+    await request('/admin/verify-pin', { method: 'POST', body: JSON.stringify({ pin }) })
     return true
   } catch (e) {
-    if (e.message.includes('404') || e.message.toLowerCase().includes('not found')) return true
     return false
   }
 }

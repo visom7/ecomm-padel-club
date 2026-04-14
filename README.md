@@ -73,3 +73,11 @@ Admin actions require the `X-Admin-Pin` header.
 14 players pre-seeded on first boot:
 - **Admins**: Jorge, Alfonso, Ernesto, Carmen
 - **Players**: Alex B, Jose, Borja, Emilio, Rubén, Marco, Alex, Victor, Blas, Christian
+
+
+## Push to docker:
+cd /Users/ernesto/wed/data/ws/ecomm-padel-club/backend
+docker buildx build --platform linux/amd64 -t visom77/padel-backend:latest --push .
+
+cd ../frontend
+docker buildx build --platform linux/amd64 -t visom77/padel-frontend:latest --push .
