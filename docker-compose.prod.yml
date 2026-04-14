@@ -11,7 +11,10 @@
 services:
   backend:
     image: ${REGISTRY}/padel-backend:latest
-    env_file: .env
+    environment:
+      - MONGO_URI=${MONGO_URI}
+      - ADMIN_PIN=${ADMIN_PIN}
+      - CORS_ORIGIN=${CORS_ORIGIN}
     ports:
       - "8080:8080"
     extra_hosts:
