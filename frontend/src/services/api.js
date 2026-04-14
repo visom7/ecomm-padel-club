@@ -1,9 +1,10 @@
 const BASE_URL = '/api'
 
 async function request(path, options = {}) {
+  const { headers: extraHeaders, ...rest } = options
   const res = await fetch(`${BASE_URL}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
-    ...options,
+    headers: { 'Content-Type': 'application/json', ...extraHeaders },
+    ...rest,
   })
   if (!res.ok) {
     const text = await res.text()
