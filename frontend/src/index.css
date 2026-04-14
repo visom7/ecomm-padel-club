@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-gray-900 font-sans;
+  }
+}
+
+@layer components {
+  .btn-pink {
+    @apply bg-padel-pink text-white font-semibold px-4 py-2 rounded-xl 
+           active:bg-padel-pink-dark transition-colors;
+  }
+  .btn-outline {
+    @apply border-2 border-padel-pink text-padel-pink font-semibold px-4 py-2 rounded-xl 
+           active:bg-padel-pink-bg transition-colors;
+  }
+  .card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+  }
+  .badge-open {
+    @apply bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+  .badge-closed {
+    @apply bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+  .badge-played {
+    @apply bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full;
+  }
+  .input-field {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm 
+           focus:outline-none focus:border-padel-pink transition-colors bg-gray-50;
+  }
+}
