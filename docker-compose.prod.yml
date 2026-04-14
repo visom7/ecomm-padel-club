@@ -1,0 +1,27 @@
+# docker-compose for production (mini PC / Portainer)
+# Uses pre-built images from a registry instead of building locally.
+#
+# Usage:
+#   REGISTRY=myuser docker compose -f docker-compose.prod.yml up -d
+#
+# Or set REGISTRY in a .env file:
+#   REGISTRY=myuser
+#   REGISTRY=ghcr.io/myuser
+
+services:
+  backend:
+    image: ${REGISTRY}/padel-backend:latest
+    env_file: .env
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  frontend:
+    image: ${REGISTRY}/padel-frontend:latest
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
