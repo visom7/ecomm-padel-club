@@ -60,12 +60,12 @@ export default function PlayerSelectPage() {
   const regularPlayers = players.filter(p => p.role === 'PLAYER')
 
   return (
-    <div className="min-h-screen bg-padel-pink-bg flex flex-col">
+    <div className="min-h-screen bg-gray-50 flex flex-col">
       {/* Logo */}
-      <div className="pt-12 pb-8 px-6 flex flex-col items-center">
+      <div className="pt-12 pb-8 px-6 flex flex-col items-center bg-gray-700 rounded-b-3xl">
         <img src="/logo.png" alt="Ecomm Pädel Club" className="h-16 object-contain mb-6" />
-        <h1 className="text-xl font-bold text-gray-800">¿Quién eres?</h1>
-        <p className="text-sm text-gray-500 mt-1">Selecciona tu nombre para continuar</p>
+        <h1 className="text-xl font-bold text-white">¿Quién eres?</h1>
+        <p className="text-sm text-gray-300 mt-1">Selecciona tu nombre para continuar</p>
       </div>
 
       {/* Player list */}
