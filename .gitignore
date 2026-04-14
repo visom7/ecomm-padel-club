@@ -1,0 +1,38 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/
+!.mvn/wrapper/maven-wrapper.jar
+.settings/
+.project
+.classpath
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Spring Boot
+spring-shell.log
+
+# Node / React
+node_modules/
+dist/
+.cache/
+.parcel-cache/
+frontend/dist/
+
+# Environment / secrets
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
