@@ -6,6 +6,11 @@ import { getAdminPin } from '../context/adminPin'
 
 const STATUS_LABELS = { OPEN: 'Abierta', CLOSED: 'Cerrada', PLAYED: 'Jugada' }
 const STATUS_BADGE = { OPEN: 'badge-open', CLOSED: 'badge-closed', PLAYED: 'badge-played' }
+const OUTCOME_CONFIG = {
+  WIN:  { label: 'Victoria 🏆', cls: 'bg-green-100 text-green-700 border border-green-200' },
+  LOSS: { label: 'Derrota 😔',  cls: 'bg-red-100 text-red-600 border border-red-200' },
+  DRAW: { label: 'Empate 🤝',   cls: 'bg-gray-100 text-gray-500 border border-gray-200' },
+}
 
 export default function MatchdayDetailPage() {
   const { id } = useParams()
@@ -75,7 +80,14 @@ export default function MatchdayDetailPage() {
       <div className="card">
         <div className="flex items-start justify-between gap-2 mb-3">
           <div>
-            <span className={STATUS_BADGE[matchday.status]}>{STATUS_LABELS[matchday.status]}</span>
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <span className={STATUS_BADGE[matchday.status]}>{STATUS_LABELS[matchday.status]}</span>
+              {matchday.matchResult?.outcome && OUTCOME_CONFIG[matchday.matchResult.outcome] && (
+                <span className={`text-sm font-semibold px-3 py-0.5 rounded-full ${OUTCOME_CONFIG[matchday.matchResult.outcome].cls}`}>
+                  {OUTCOME_CONFIG[matchday.matchResult.outcome].label}
+                </span>
+              )}
+            </div>
             <h1 className="text-xl font-bold text-gray-800 mt-1">{matchday.title || 'Convocatoria'}</h1>
           </div>
           <div className="text-center shrink-0">

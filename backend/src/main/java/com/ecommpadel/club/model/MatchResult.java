@@ -4,6 +4,9 @@ import java.util.List;
 
 public class MatchResult {
 
+    public enum Outcome { WIN, LOSS, DRAW }
+
+    private Outcome outcome;
     private List<String> finalPlayers;
     private PairResult pair1;
     private PairResult pair2;
@@ -11,12 +14,16 @@ public class MatchResult {
 
     public MatchResult() {}
 
-    public MatchResult(List<String> finalPlayers, PairResult pair1, PairResult pair2, PairResult pair3) {
+    public MatchResult(Outcome outcome, List<String> finalPlayers, PairResult pair1, PairResult pair2, PairResult pair3) {
+        this.outcome = outcome;
         this.finalPlayers = finalPlayers;
         this.pair1 = pair1;
         this.pair2 = pair2;
         this.pair3 = pair3;
     }
+
+    public Outcome getOutcome() { return outcome; }
+    public void setOutcome(Outcome outcome) { this.outcome = outcome; }
 
     public List<String> getFinalPlayers() { return finalPlayers; }
     public void setFinalPlayers(List<String> finalPlayers) { this.finalPlayers = finalPlayers; }

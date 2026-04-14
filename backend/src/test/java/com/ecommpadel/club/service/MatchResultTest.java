@@ -28,6 +28,7 @@ class MatchResultTest {
         PairResult pair3 = new PairResult(List.of(new SetScore(6, 0), new SetScore(6, 1)));
 
         MatchResult result = new MatchResult(
+                null,
                 List.of("Ernesto", "Jorge", "Alex", "Borja", "Carmen", "Alfonso"),
                 pair1, pair2, pair3
         );

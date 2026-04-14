@@ -1,13 +1,41 @@
+import { useState } from 'react'
+import { useSession } from '../context/SessionContext'
+import { respondToMatchday } from '../services/api'
+
 const STATUS_LABELS = { OPEN: 'Abierta', CLOSED: 'Cerrada', PLAYED: 'Jugada' }
 const STATUS_BADGE = { OPEN: 'badge-open', CLOSED: 'badge-closed', PLAYED: 'badge-played' }
 
-export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDelete }) {
+export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDelete, onRespond }) {
   const { title, status, date, time, venue, competition, round } = matchday
   const available = (matchday.registrations || []).filter(r => r.availability === 'AVAILABLE').length
+  const { session } = useSession()
+  const [responding, setResponding] = useState(false)
+
+  const myResponse = session?.playerId
+    ? (matchday.registrations || []).find(r => r.playerId === session.playerId)?.availability
+    : null
+
+  const isOpen = status === 'OPEN'
 
   const formattedDate = date
     ? new Date(date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
     : null
+
+  const handleQuickResponse = async (e, availability) => {
+    e.stopPropagation()
+    if (!session?.playerId || responding) return
+    setResponding(true)
+    try {
+      const updated = await respondToMatchday(matchday.id, {
+        playerId: session.playerId,
+        name: session.name,
+        availability,
+      })
+      onRespond?.(updated)
+    } finally {
+      setResponding(false)
+    }
+  }
 
   return (
     <div
@@ -38,6 +66,34 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
           <span className="text-xs text-gray-400 leading-none">pueden</span>
         </div>
       </div>
+
+      {/* Quick response buttons for open matchdays */}
+      {isOpen && session?.playerId && (
+        <div className="flex gap-2 mt-3 pt-3 border-t border-gray-50" onClick={e => e.stopPropagation()}>
+          <button
+            disabled={responding}
+            onClick={e => handleQuickResponse(e, 'AVAILABLE')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${
+              myResponse === 'AVAILABLE'
+                ? 'bg-green-500 border-green-500 text-white'
+                : 'border-green-400 text-green-600 active:bg-green-50'
+            }`}
+          >
+            ✅ Puedo
+          </button>
+          <button
+            disabled={responding}
+            onClick={e => handleQuickResponse(e, 'UNAVAILABLE')}
+            className={`flex-1 py-2 rounded-xl text-sm font-semibold border-2 transition-colors ${
+              myResponse === 'UNAVAILABLE'
+                ? 'bg-red-400 border-red-400 text-white'
+                : 'border-red-300 text-red-500 active:bg-red-50'
+            }`}
+          >
+            ❌ No puedo
+          </button>
+        </div>
+      )}
 
       {isAdmin && (
         <div className="flex gap-2 mt-3 pt-3 border-t border-gray-50">

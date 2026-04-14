@@ -41,17 +41,32 @@ export default function PlayedMatchesPage() {
   )
 }
 
+const OUTCOME_BADGE = {
+  WIN:  { label: 'Victoria', cls: 'bg-green-100 text-green-700' },
+  LOSS: { label: 'Derrota',  cls: 'bg-red-100 text-red-600' },
+  DRAW: { label: 'Empate',   cls: 'bg-gray-100 text-gray-500' },
+}
+
 function PlayedMatchCard({ match, onClick }) {
   const { title, date, venue, competition, matchResult } = match
   const formattedDate = date
     ? new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
     : null
 
+  const outcome = matchResult?.outcome ? OUTCOME_BADGE[matchResult.outcome] : null
+
   return (
     <div onClick={onClick} className="card cursor-pointer active:bg-gray-50">
       <div className="flex items-start justify-between gap-2 mb-2">
         <div>
-          <span className="badge-played">Jugado</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="badge-played">Jugado</span>
+            {outcome && (
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${outcome.cls}`}>
+                {outcome.label}
+              </span>
+            )}
+          </div>
           <h2 className="font-bold text-gray-800 mt-1">{title || 'Partido'}</h2>
           {(formattedDate || venue) && (
             <p className="text-sm text-gray-500 mt-0.5">

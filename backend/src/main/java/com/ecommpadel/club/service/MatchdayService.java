@@ -88,6 +88,7 @@ public class MatchdayService {
         Matchday matchday = findById(id);
 
         MatchResult result = new MatchResult(
+                request.getOutcome(),
                 request.getFinalPlayers(),
                 request.getPair1(),
                 request.getPair2(),

@@ -5,6 +5,12 @@ import { getAdminPin } from '../context/adminPin'
 
 const EMPTY_PAIR = { sets: [{ gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }] }
 
+const OUTCOMES = [
+  { value: 'WIN',  label: 'Ganamos',  emoji: '🏆', active: 'bg-green-500 border-green-500 text-white', inactive: 'border-green-400 text-green-600' },
+  { value: 'LOSS', label: 'Perdimos', emoji: '😔', active: 'bg-red-400 border-red-400 text-white',     inactive: 'border-red-300 text-red-500' },
+  { value: 'DRAW', label: 'Empate',   emoji: '🤝', active: 'bg-gray-400 border-gray-400 text-white',   inactive: 'border-gray-300 text-gray-500' },
+]
+
 export default function ResultFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -13,6 +19,7 @@ export default function ResultFormPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
+  const [outcome, setOutcome] = useState(null)
   const [finalPlayers, setFinalPlayers] = useState([])
   const [pairs, setPairs] = useState([
     structuredClone(EMPTY_PAIR),
@@ -57,6 +64,7 @@ export default function ResultFormPage() {
           .map(s => ({ gamesHome: Number(s.gamesHome), gamesAway: Number(s.gamesAway) }))
       })
       await submitResult(id, {
+        outcome,
         finalPlayers,
         pair1: buildPair(pairs[0]),
         pair2: buildPair(pairs[1]),
@@ -91,6 +99,25 @@ export default function ResultFormPage() {
       <p className="text-sm text-gray-500 mb-5">{matchday?.title || 'Partido'}</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Outcome */}
+        <div className="card">
+          <p className="text-sm font-semibold text-gray-700 mb-3">Resultado del partido</p>
+          <div className="flex gap-2">
+            {OUTCOMES.map(o => (
+              <button
+                key={o.value}
+                type="button"
+                onClick={() => setOutcome(o.value)}
+                className={`flex-1 py-2.5 rounded-xl font-semibold text-sm border-2 transition-colors ${
+                  outcome === o.value ? o.active : o.inactive
+                }`}
+              >
+                {o.emoji} {o.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Final players */}
         <div className="card">
           <p className="text-sm font-semibold text-gray-700 mb-3">¿Quién jugó finalmente?</p>

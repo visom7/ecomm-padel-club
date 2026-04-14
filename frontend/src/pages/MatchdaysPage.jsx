@@ -38,6 +38,10 @@ export default function MatchdaysPage() {
     }
   }
 
+  const handleRespond = (updatedMatchday) => {
+    setMatchdays(prev => prev.map(m => m.id === updatedMatchday.id ? updatedMatchday : m))
+  }
+
   if (loading) return <LoadingSpinner />
   if (error) return <ErrorMsg msg={error} />
 
@@ -70,6 +74,7 @@ export default function MatchdaysPage() {
               onDelete={() => handleDelete(m.id)}
               onEdit={() => navigate(`/matchdays/${m.id}/edit`)}
               onClick={() => navigate(`/matchdays/${m.id}`)}
+              onRespond={handleRespond}
             />
           ))}
         </div>
