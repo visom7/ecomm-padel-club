@@ -15,14 +15,8 @@ export default function Header() {
   return (
     <header className="bg-white border-b border-gray-100 sticky top-0 z-10">
       <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Logo text mark */}
-        <div className="flex items-center gap-2">
-          <span className="text-padel-pink font-bold text-lg tracking-tight">
-            p<span className="italic">ä</span>del
-          </span>
-          <span className="text-gray-400 text-xs font-light uppercase tracking-widest">club</span>
-          <span className="w-2 h-2 rounded-full bg-padel-pink ml-1" />
-        </div>
+        {/* Logo */}
+        <img src="/logo.png" alt="Ecomm Pädel Club" className="h-8 object-contain" />
 
         {session && (
           <div className="flex items-center gap-2">

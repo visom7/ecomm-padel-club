@@ -61,16 +61,10 @@ export default function PlayerSelectPage() {
 
   return (
     <div className="min-h-screen bg-padel-pink-bg flex flex-col">
-      {/* Header */}
-      <div className="pt-12 pb-8 px-6 text-center">
-        <div className="inline-flex items-baseline gap-1 mb-1">
-          <span className="text-4xl font-bold text-padel-pink tracking-tight">
-            p<em>ä</em>del
-          </span>
-          <span className="text-padel-pink w-2.5 h-2.5 rounded-full bg-padel-pink inline-block mb-1" />
-        </div>
-        <p className="text-sm text-gray-400 uppercase tracking-widest font-light">club</p>
-        <h1 className="mt-6 text-xl font-bold text-gray-800">¿Quién eres?</h1>
+      {/* Logo */}
+      <div className="pt-12 pb-8 px-6 flex flex-col items-center">
+        <img src="/logo.png" alt="Ecomm Pädel Club" className="h-16 object-contain mb-6" />
+        <h1 className="text-xl font-bold text-gray-800">¿Quién eres?</h1>
         <p className="text-sm text-gray-500 mt-1">Selecciona tu nombre para continuar</p>
       </div>
 
