@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Build and push Docker images to registry
+# Build multi-platform images and push to registry
 # Usage: ./scripts/push-images.sh [registry/username]
-# Example: ./scripts/push-images.sh myuser
-#          ./scripts/push-images.sh ghcr.io/myuser
+# Example: ./scripts/push-images.sh visom77
 
 set -e
 
@@ -10,27 +9,36 @@ REGISTRY="${1:-CHANGE_ME}"
 
 if [ "$REGISTRY" = "CHANGE_ME" ]; then
   echo "❌  Usage: ./scripts/push-images.sh <registry/username>"
-  echo "    Docker Hub:  ./scripts/push-images.sh myuser"
-  echo "    GHCR:        ./scripts/push-images.sh ghcr.io/myuser"
+  echo "    Docker Hub:  ./scripts/push-images.sh visom77"
+  echo "    GHCR:        ./scripts/push-images.sh ghcr.io/visom77"
   exit 1
 fi
 
 BACKEND_IMAGE="$REGISTRY/padel-backend:latest"
 FRONTEND_IMAGE="$REGISTRY/padel-frontend:latest"
+PLATFORMS="linux/amd64,linux/arm64"
 
-echo "🔨 Building backend → $BACKEND_IMAGE"
-docker build -t "$BACKEND_IMAGE" ./backend
+# Ensure buildx builder with multi-platform support exists
+docker buildx inspect padel-builder > /dev/null 2>&1 || \
+  docker buildx create --name padel-builder --use --bootstrap
 
-echo "🔨 Building frontend → $FRONTEND_IMAGE"
-docker build -t "$FRONTEND_IMAGE" ./frontend
+docker buildx use padel-builder
 
-echo "📤 Pushing images..."
-docker push "$BACKEND_IMAGE"
-docker push "$FRONTEND_IMAGE"
+echo "🔨 Building & pushing backend → $BACKEND_IMAGE ($PLATFORMS)"
+docker buildx build \
+  --platform "$PLATFORMS" \
+  --tag "$BACKEND_IMAGE" \
+  --push \
+  ./backend
+
+echo "🔨 Building & pushing frontend → $FRONTEND_IMAGE ($PLATFORMS)"
+docker buildx build \
+  --platform "$PLATFORMS" \
+  --tag "$FRONTEND_IMAGE" \
+  --push \
+  ./frontend
 
 echo ""
-echo "✅ Done! Update docker-compose.prod.yml with:"
-echo "   REGISTRY=$REGISTRY"
-echo ""
-echo "   Then on the mini PC:"
+echo "✅ Multi-platform images pushed (amd64 + arm64)"
+echo "   Deploy on mini PC with:"
 echo "   REGISTRY=$REGISTRY docker compose -f docker-compose.prod.yml up -d"
