@@ -1,14 +1,13 @@
-// Store the PIN in memory only (not localStorage for security)
-let _adminPin = null
+const PIN_KEY = 'padel_admin_pin'
 
 export function setAdminPin(pin) {
-  _adminPin = pin
+  sessionStorage.setItem(PIN_KEY, pin)
 }
 
 export function getAdminPin() {
-  return _adminPin
+  return sessionStorage.getItem(PIN_KEY)
 }
 
 export function clearAdminPin() {
-  _adminPin = null
+  sessionStorage.removeItem(PIN_KEY)
 }

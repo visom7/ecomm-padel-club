@@ -8,6 +8,7 @@ const STATUS_BADGE = { OPEN: 'badge-open', CLOSED: 'badge-closed', PLAYED: 'badg
 export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDelete, onRespond }) {
   const { title, status, date, time, venue, competition, round } = matchday
   const available = (matchday.registrations || []).filter(r => r.availability === 'AVAILABLE').length
+  const totalResponded = (matchday.registrations || []).length
   const { session } = useSession()
   const [responding, setResponding] = useState(false)
 
@@ -62,7 +63,9 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
 
         {/* Available count */}
         <div className="flex flex-col items-center shrink-0">
-          <span className="text-2xl font-bold text-padel-pink">{available}</span>
+          <span className="text-2xl font-bold text-padel-pink">
+            {available}<span className="text-base text-gray-400 font-normal">/{totalResponded}</span>
+          </span>
           <span className="text-xs text-gray-400 leading-none">pueden</span>
         </div>
       </div>

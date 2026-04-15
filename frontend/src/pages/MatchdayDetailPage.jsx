@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getMatchday, respondToMatchday, closeMatchday, deleteMatchday } from '../services/api'
+import { getMatchday, getPlayers, respondToMatchday, closeMatchday, deleteMatchday } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { getAdminPin } from '../context/adminPin'
 
@@ -17,6 +17,7 @@ export default function MatchdayDetailPage() {
   const navigate = useNavigate()
   const { session } = useSession()
   const [matchday, setMatchday] = useState(null)
+  const [allPlayers, setAllPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [responding, setResponding] = useState(false)
 
@@ -24,7 +25,12 @@ export default function MatchdayDetailPage() {
 
   const load = () => {
     setLoading(true)
-    getMatchday(id).then(setMatchday).finally(() => setLoading(false))
+    Promise.all([getMatchday(id), getPlayers()])
+      .then(([matchdayData, playersData]) => {
+        setMatchday(matchdayData)
+        setAllPlayers(playersData)
+      })
+      .finally(() => setLoading(false))
   }
 
   useEffect(load, [id])
@@ -64,6 +70,8 @@ export default function MatchdayDetailPage() {
 
   const available = matchday.registrations.filter(r => r.availability === 'AVAILABLE')
   const unavailable = matchday.registrations.filter(r => r.availability === 'UNAVAILABLE')
+  const respondedIds = new Set(matchday.registrations.map(r => r.playerId))
+  const noResponse = allPlayers.filter(p => !respondedIds.has(p.id))
   const isOpen = matchday.status === 'OPEN'
 
   return (
@@ -91,7 +99,9 @@ export default function MatchdayDetailPage() {
             <h1 className="text-xl font-bold text-gray-800 mt-1">{matchday.title || 'Convocatoria'}</h1>
           </div>
           <div className="text-center shrink-0">
-            <span className="text-3xl font-bold text-padel-pink">{available.length}</span>
+            <span className="text-3xl font-bold text-padel-pink">
+              {available.length}<span className="text-lg text-gray-400 font-normal">/{matchday.registrations.length}</span>
+            </span>
             <p className="text-xs text-gray-400 leading-none">pueden</p>
           </div>
         </div>
@@ -177,6 +187,21 @@ export default function MatchdayDetailPage() {
         {matchday.registrations.length === 0 && (
           <p className="text-sm text-gray-400">Nadie se ha apuntado todavía</p>
         )}
+        {noResponse.length > 0 && (
+          <>
+            <p className="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-2 mt-4">
+              Sin respuesta ({noResponse.length})
+            </p>
+            <ul className="space-y-1">
+              {noResponse.map(p => (
+                <li key={p.id} className="flex items-center gap-2 text-sm text-gray-400">
+                  <span className="w-2 h-2 rounded-full bg-gray-200 shrink-0" />
+                  {p.name}
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
       </div>
 
       {/* Admin actions */}
@@ -200,6 +225,14 @@ export default function MatchdayDetailPage() {
               className="btn-pink w-full py-2.5 text-sm"
             >
               🏅 Registrar resultado
+            </button>
+          )}
+          {matchday.status === 'PLAYED' && (
+            <button
+              onClick={() => navigate(`/matchdays/${id}/result`)}
+              className="btn-outline w-full py-2.5 text-sm"
+            >
+              ✏️ Editar resultado
             </button>
           )}
           <button onClick={handleDelete} className="w-full py-2.5 text-sm text-red-400 font-semibold">

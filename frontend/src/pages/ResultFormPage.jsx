@@ -30,8 +30,22 @@ export default function ResultFormPage() {
   useEffect(() => {
     getMatchday(id).then(data => {
       setMatchday(data)
-      const avail = data.registrations.filter(r => r.availability === 'AVAILABLE').map(r => r.name)
-      setFinalPlayers(avail)
+
+      const existing = data.matchResult
+      if (existing) {
+        // Pre-populate from existing result
+        setOutcome(existing.outcome || null)
+        setFinalPlayers(existing.finalPlayers || [])
+        const pairToForm = (pair) => pair
+          ? { sets: [0, 1, 2].map(i => pair.sets?.[i]
+              ? { gamesHome: pair.sets[i].gamesHome, gamesAway: pair.sets[i].gamesAway }
+              : { gamesHome: '', gamesAway: '' }) }
+          : structuredClone(EMPTY_PAIR)
+        setPairs([pairToForm(existing.pair1), pairToForm(existing.pair2), pairToForm(existing.pair3)])
+      } else {
+        const avail = data.registrations.filter(r => r.availability === 'AVAILABLE').map(r => r.name)
+        setFinalPlayers(avail)
+      }
       setLoading(false)
     })
   }, [id])
@@ -95,7 +109,9 @@ export default function ResultFormPage() {
         Volver
       </button>
 
-      <h1 className="text-xl font-bold text-gray-800 mb-1">Registrar resultado</h1>
+      <h1 className="text-xl font-bold text-gray-800 mb-1">
+        {matchday?.matchResult ? 'Editar resultado' : 'Registrar resultado'}
+      </h1>
       <p className="text-sm text-gray-500 mb-5">{matchday?.title || 'Partido'}</p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
