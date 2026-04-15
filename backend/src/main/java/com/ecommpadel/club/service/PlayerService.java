@@ -1,14 +1,18 @@
 package com.ecommpadel.club.service;
 
+import com.ecommpadel.club.dto.PlayerStatsDto;
+import com.ecommpadel.club.model.Matchday;
+import com.ecommpadel.club.model.MatchResult;
 import com.ecommpadel.club.model.Player;
+import com.ecommpadel.club.model.PlayerResponse;
+import com.ecommpadel.club.repository.MatchdayRepository;
 import com.ecommpadel.club.repository.PlayerRepository;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class PlayerService {
@@ -16,9 +20,11 @@ public class PlayerService {
     private static final Logger log = LoggerFactory.getLogger(PlayerService.class);
 
     private final PlayerRepository playerRepository;
+    private final MatchdayRepository matchdayRepository;
 
-    public PlayerService(PlayerRepository playerRepository) {
+    public PlayerService(PlayerRepository playerRepository, MatchdayRepository matchdayRepository) {
         this.playerRepository = playerRepository;
+        this.matchdayRepository = matchdayRepository;
     }
 
     @PostConstruct
@@ -61,5 +67,62 @@ public class PlayerService {
         return playerRepository.findByName(name)
                 .map(p -> Player.Role.ADMIN.equals(p.getRole()))
                 .orElse(false);
+    }
+
+    public List<PlayerStatsDto> getGlobalStats() {
+        List<Matchday> allMatchdays = matchdayRepository.findAll();
+
+        Map<String, int[]> statsMap = new LinkedHashMap<>();
+        Map<String, String> playerNames = new LinkedHashMap<>();
+
+        for (Matchday matchday : allMatchdays) {
+            // apuntados
+            for (PlayerResponse reg : matchday.getRegistrations()) {
+                if (PlayerResponse.Availability.AVAILABLE.equals(reg.getAvailability())) {
+                    String pid = reg.getPlayerId();
+                    statsMap.computeIfAbsent(pid, k -> new int[4]);
+                    playerNames.put(pid, reg.getName());
+                    statsMap.get(pid)[0]++;
+                }
+            }
+
+            // jugados / ganados / perdidos
+            if (Matchday.Status.PLAYED.equals(matchday.getStatus()) && matchday.getMatchResult() != null) {
+                MatchResult result = matchday.getMatchResult();
+                MatchResult.Outcome outcome = result.getOutcome();
+                List<String> finalPlayers = result.getFinalPlayers();
+                if (finalPlayers != null) {
+                    for (String playerName : finalPlayers) {
+                        String pid = findPlayerIdByName(playerName, matchday.getRegistrations());
+                        if (pid == null) {
+                            pid = "name:" + playerName;
+                        }
+                        playerNames.putIfAbsent(pid, playerName);
+                        statsMap.computeIfAbsent(pid, k -> new int[4]);
+                        statsMap.get(pid)[1]++;
+                        if (outcome == MatchResult.Outcome.WIN)  statsMap.get(pid)[2]++;
+                        else if (outcome == MatchResult.Outcome.LOSS) statsMap.get(pid)[3]++;
+                    }
+                }
+            }
+        }
+
+        List<PlayerStatsDto> result = new ArrayList<>();
+        for (Map.Entry<String, int[]> entry : statsMap.entrySet()) {
+            int[] s = entry.getValue();
+            String pid = entry.getKey();
+            String name = playerNames.getOrDefault(pid, pid);
+            result.add(new PlayerStatsDto(pid, name, s[0], s[1], s[2], s[3]));
+        }
+        result.sort(Comparator.comparingInt(PlayerStatsDto::getJugados).reversed());
+        return result;
+    }
+
+    private String findPlayerIdByName(String name, List<PlayerResponse> registrations) {
+        return registrations.stream()
+                .filter(r -> name.equals(r.getName()))
+                .map(PlayerResponse::getPlayerId)
+                .findFirst()
+                .orElse(null);
     }
 }
