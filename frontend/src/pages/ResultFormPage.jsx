@@ -77,8 +77,10 @@ export default function ResultFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setSaving(true)
-    setError(null)
+    if (finalPlayers.length !== 6) {
+      setError('Debes seleccionar exactamente 6 jugadores')
+      return
+    }
     try {
       const buildPair = (pair) => ({
         sets: pair.sets
@@ -144,23 +146,44 @@ export default function ResultFormPage() {
 
         {/* Final players */}
         <div className="card">
-          <p className="text-sm font-semibold text-gray-700 mb-3">¿Quién jugó finalmente?</p>
-          <div className="flex flex-wrap gap-2">
-            {allPlayerNames.map(name => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => togglePlayer(name)}
-                className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                  finalPlayers.includes(name)
-                    ? 'bg-padel-pink border-padel-pink text-white'
-                    : 'border-gray-200 text-gray-600'
-                }`}
-              >
-                {name}
-              </button>
-            ))}
+          <div className="flex items-center justify-between mb-3">
+            <p className="text-sm font-semibold text-gray-700">¿Quién jugó finalmente?</p>
+            <span className={`text-sm font-bold px-2 py-0.5 rounded-full ${
+              finalPlayers.length === 6
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-500'
+            }`}>
+              {finalPlayers.length}/6
+            </span>
           </div>
+          <div className="flex flex-wrap gap-2">
+            {allPlayerNames.map(name => {
+              const selected = finalPlayers.includes(name)
+              const maxReached = !selected && finalPlayers.length >= 6
+              return (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => !maxReached && togglePlayer(name)}
+                  disabled={maxReached}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                    selected
+                      ? 'bg-padel-pink border-padel-pink text-white'
+                      : maxReached
+                        ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                        : 'border-gray-200 text-gray-600'
+                  }`}
+                >
+                  {name}
+                </button>
+              )
+            })}
+          </div>
+          {finalPlayers.length > 0 && finalPlayers.length !== 6 && (
+            <p className="text-xs text-amber-500 mt-2">
+              Selecciona exactamente 6 jugadores ({6 - finalPlayers.length} restante{6 - finalPlayers.length !== 1 ? 's' : ''})
+            </p>
+          )}
         </div>
 
         {/* Pairs */}
@@ -201,7 +224,7 @@ export default function ResultFormPage() {
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 
-        <button type="submit" disabled={saving} className="btn-pink w-full py-3 disabled:opacity-50">
+        <button type="submit" disabled={saving || finalPlayers.length !== 6} className="btn-pink w-full py-3 disabled:opacity-50">
           {saving ? 'Guardando…' : 'Guardar resultado'}
         </button>
       </form>
