@@ -95,13 +95,12 @@ public class CompetitionService {
                 List<String> finalPlayers = result.getFinalPlayers();
                 if (finalPlayers != null) {
                     for (String playerName : finalPlayers) {
-                        // finalPlayers stores names, not IDs — find matching player by name
                         String pid = findPlayerIdByName(playerName, matchday.getRegistrations());
                         if (pid == null) {
-                            // Use name as key if no ID found
                             pid = "name:" + playerName;
-                            playerNames.put(pid, playerName);
                         }
+                        // Always store the name so we never show a raw ID
+                        playerNames.putIfAbsent(pid, playerName);
                         statsMap.computeIfAbsent(pid, k -> new int[4]);
                         statsMap.get(pid)[1]++; // jugados
                         if (outcome == MatchResult.Outcome.WIN) statsMap.get(pid)[2]++; // ganados

@@ -106,7 +106,7 @@ export default function CompetitionStatsPage() {
                   <th className="text-left px-4 py-2">Jugador</th>
                   <th className="text-center px-2 py-2">Apt.</th>
                   <th className="text-center px-2 py-2">Jug.</th>
-                  <th className="text-center px-2 py-2">%Jug.</th>
+                  <th className="text-center px-2 py-2 bg-indigo-50 text-indigo-600 font-bold">% Jug.</th>
                   <th className="text-center px-2 py-2">Gan.</th>
                   <th className="text-center px-2 py-2">Per.</th>
                   <th className="text-center px-2 py-2">%Gan.</th>
@@ -116,9 +116,21 @@ export default function CompetitionStatsPage() {
                 {sorted.map((p, i) => (
                   <tr key={p.playerId} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                     <td className="px-4 py-2.5 font-medium text-gray-800">{p.name}</td>
-                    <td className="text-center px-2 py-2.5 text-gray-500">{p.apuntados}</td>
-                    <td className="text-center px-2 py-2.5 font-semibold text-gray-700">{p.jugados}</td>
-                    <td className="text-center px-2 py-2.5 text-gray-500">{p.pctJugados}%</td>
+                    <td className="text-center px-2 py-2.5 text-gray-400 text-xs">{p.apuntados}</td>
+                    <td className="text-center px-2 py-2.5 font-bold text-gray-700">{p.jugados}</td>
+                    <td className="px-2 py-2 bg-indigo-50">
+                      <div className="flex flex-col items-center gap-1">
+                        <span className={`text-sm font-bold ${p.pctJugados >= 75 ? 'text-indigo-700' : p.pctJugados >= 50 ? 'text-indigo-500' : 'text-gray-400'}`}>
+                          {p.pctJugados}%
+                        </span>
+                        <div className="w-full bg-indigo-100 rounded-full h-1.5 max-w-[48px]">
+                          <div
+                            className="bg-indigo-500 h-1.5 rounded-full transition-all"
+                            style={{ width: `${Math.min(p.pctJugados, 100)}%` }}
+                          />
+                        </div>
+                      </div>
+                    </td>
                     <td className="text-center px-2 py-2.5 text-green-600 font-semibold">{p.ganados}</td>
                     <td className="text-center px-2 py-2.5 text-red-500">{p.perdidos}</td>
                     <td className="text-center px-2 py-2.5 font-semibold">
