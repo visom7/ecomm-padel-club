@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getMatchday, getPlayers, respondToMatchday, closeMatchday, deleteMatchday } from '../services/api'
+import { getMatchday, getPlayers, respondToMatchday, closeMatchday, deleteMatchday, handleAdminError } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { getAdminPin } from '../context/adminPin'
 
@@ -51,14 +51,22 @@ export default function MatchdayDetailPage() {
 
   const handleClose = async () => {
     if (!confirm('¿Cerrar esta convocatoria?')) return
-    const updated = await closeMatchday(id, getAdminPin())
-    setMatchday(updated)
+    try {
+      const updated = await closeMatchday(id, getAdminPin())
+      setMatchday(updated)
+    } catch (err) {
+      handleAdminError(err, navigate)
+    }
   }
 
   const handleDelete = async () => {
     if (!confirm('¿Eliminar esta convocatoria?')) return
-    await deleteMatchday(id, getAdminPin())
-    navigate('/matchdays')
+    try {
+      await deleteMatchday(id, getAdminPin())
+      navigate('/matchdays')
+    } catch (err) {
+      handleAdminError(err, navigate)
+    }
   }
 
   if (loading) return (

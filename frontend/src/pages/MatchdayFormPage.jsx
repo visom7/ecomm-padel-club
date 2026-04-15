@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { createMatchday, updateMatchday, getMatchday } from '../services/api'
+import { createMatchday, updateMatchday, getMatchday, handleAdminError } from '../services/api'
 import { getAdminPin } from '../context/adminPin'
 
 export default function MatchdayFormPage() {
@@ -53,7 +53,7 @@ export default function MatchdayFormPage() {
       }
       navigate('/matchdays')
     } catch (err) {
-      setError('Error al guardar: ' + err.message)
+      handleAdminError(err, navigate, setError)
     } finally {
       setSaving(false)
     }

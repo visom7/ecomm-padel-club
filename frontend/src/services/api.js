@@ -1,3 +1,5 @@
+import { clearAdminPin } from '../context/adminPin'
+
 const BASE_URL = '/api'
 
 async function request(path, options = {}) {
@@ -6,12 +8,24 @@ async function request(path, options = {}) {
     headers: { 'Content-Type': 'application/json', ...extraHeaders },
     ...rest,
   })
+  if (res.status === 401) throw new Error('UNAUTHORIZED')
   if (!res.ok) {
     const text = await res.text()
     throw new Error(text || `HTTP ${res.status}`)
   }
   if (res.status === 204) return null
   return res.json()
+}
+
+export function handleAdminError(err, navigate, setError) {
+  if (err.message === 'UNAUTHORIZED') {
+    clearAdminPin()
+    navigate('/')
+  } else if (setError) {
+    setError('Error: ' + err.message)
+  } else {
+    alert('Error: ' + err.message)
+  }
 }
 
 // Players

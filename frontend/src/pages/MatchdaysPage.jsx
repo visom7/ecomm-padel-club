@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getActiveMatchdays, deleteMatchday } from '../services/api'
+import { getActiveMatchdays, deleteMatchday, handleAdminError } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { getAdminPin } from '../context/adminPin'
 import MatchdayCard from '../components/MatchdayCard'
@@ -33,8 +33,8 @@ export default function MatchdaysPage() {
     try {
       await deleteMatchday(id, getAdminPin())
       load()
-    } catch {
-      alert('Error al eliminar')
+    } catch (err) {
+      handleAdminError(err, navigate)
     }
   }
 
