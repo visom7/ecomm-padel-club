@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPlayedMatchdays } from '../services/api'
+import { useCompetition } from '../context/CompetitionsContext'
 
 export default function PlayedMatchesPage() {
   const [matches, setMatches] = useState([])
@@ -49,6 +50,8 @@ const OUTCOME_BADGE = {
 
 function PlayedMatchCard({ match, onClick }) {
   const { title, date, venue, competition, matchResult } = match
+  const competitionData = useCompetition(competition)
+  const competitionLabel = competitionData?.name ?? (competition && !competition.includes('-') ? competition : null)
   const formattedDate = date
     ? new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
     : null
@@ -73,7 +76,17 @@ function PlayedMatchCard({ match, onClick }) {
               {[formattedDate, venue].filter(Boolean).join(' · ')}
             </p>
           )}
-          {competition && <p className="text-xs text-gray-400 mt-0.5">{competition}</p>}
+          {competitionLabel && (
+            <p className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
+              {competitionData?.color && (
+                <span
+                  className="w-2.5 h-2.5 rounded-full inline-block"
+                  style={{ backgroundColor: competitionData.color }}
+                />
+              )}
+              {competitionLabel}
+            </p>
+          )}
         </div>
         <svg className="w-5 h-5 text-gray-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />

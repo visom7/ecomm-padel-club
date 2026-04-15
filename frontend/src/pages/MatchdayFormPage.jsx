@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { createMatchday, updateMatchday, getMatchday, handleAdminError } from '../services/api'
+import { createMatchday, updateMatchday, getMatchday, getCompetitions, handleAdminError } from '../services/api'
 import { getAdminPin } from '../context/adminPin'
 
 export default function MatchdayFormPage() {
@@ -11,26 +11,33 @@ export default function MatchdayFormPage() {
   const [form, setForm] = useState({
     title: '', date: '', time: '', venue: '', competition: '', round: ''
   })
-  const [loading, setLoading] = useState(isEditing)
+  const [competitions, setCompetitions] = useState([])
+  const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    if (!isEditing) return
-    getMatchday(id).then(data => {
-      setForm({
-        title: data.title || '',
-        date: data.date || '',
-        time: data.time || '',
-        venue: data.venue || '',
-        competition: data.competition || '',
-        round: data.round || '',
-      })
-      setLoading(false)
-    })
+    const loads = [getCompetitions().then(setCompetitions)]
+    if (isEditing) {
+      loads.push(
+        getMatchday(id).then(data => {
+          setForm({
+            title: data.title || '',
+            date: data.date || '',
+            time: data.time || '',
+            venue: data.venue || '',
+            competition: data.competition || '',
+            round: data.round || '',
+          })
+        })
+      )
+    }
+    Promise.all(loads).finally(() => setLoading(false))
   }, [id, isEditing])
 
   const set = (field) => (e) => setForm(f => ({ ...f, [field]: e.target.value }))
+
+  const selectedCompetition = competitions.find(c => c.id === form.competition)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -96,9 +103,24 @@ export default function MatchdayFormPage() {
             className="input-field" />
         </Field>
         <Field label="Competición" hint="Opcional">
-          <input type="text" value={form.competition} onChange={set('competition')}
-            placeholder="Ej: Liga Municipal"
-            className="input-field" />
+          <div className="relative">
+            {selectedCompetition && (
+              <span
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
+                style={{ backgroundColor: selectedCompetition.color || '#9ca3af' }}
+              />
+            )}
+            <select
+              value={form.competition}
+              onChange={set('competition')}
+              className={`input-field ${selectedCompetition ? 'pl-8' : ''}`}
+            >
+              <option value="">— Sin competición —</option>
+              {competitions.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+          </div>
         </Field>
         <Field label="Ronda" hint="Opcional">
           <input type="text" value={form.round} onChange={set('round')}

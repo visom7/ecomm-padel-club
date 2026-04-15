@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useSession } from '../context/SessionContext'
+import { useCompetition } from '../context/CompetitionsContext'
 import { respondToMatchday } from '../services/api'
 
 const STATUS_LABELS = { OPEN: 'Abierta', CLOSED: 'Cerrada', PLAYED: 'Jugada' }
@@ -10,6 +11,7 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
   const available = (matchday.registrations || []).filter(r => r.availability === 'AVAILABLE').length
   const totalResponded = (matchday.registrations || []).length
   const { session } = useSession()
+  const competitionData = useCompetition(competition)
   const [responding, setResponding] = useState(false)
 
   const myResponse = session?.playerId
@@ -38,6 +40,8 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
     }
   }
 
+  const competitionLabel = competitionData?.name ?? (competition && !competition.includes('-') ? competition : null)
+
   return (
     <div
       onClick={onClick}
@@ -47,8 +51,16 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className={STATUS_BADGE[status]}>{STATUS_LABELS[status]}</span>
-            {competition && (
-              <span className="text-xs text-gray-400 truncate">{competition}{round ? ` · ${round}` : ''}</span>
+            {competitionLabel && (
+              <span className="flex items-center gap-1 text-xs text-gray-400 truncate">
+                {competitionData?.color && (
+                  <span
+                    className="w-2.5 h-2.5 rounded-full inline-block shrink-0"
+                    style={{ backgroundColor: competitionData.color }}
+                  />
+                )}
+                {competitionLabel}{round ? ` · ${round}` : ''}
+              </span>
             )}
           </div>
           <h2 className="font-bold text-gray-800 text-base leading-tight truncate">

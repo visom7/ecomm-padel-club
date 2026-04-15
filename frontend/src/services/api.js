@@ -62,3 +62,17 @@ export const verifyAdminPin = async (pin) => {
     return false
   }
 }
+
+// Competitions
+export const getCompetitions = () => request('/competitions')
+
+export const createCompetition = (data, pin) =>
+  request('/competitions', { method: 'POST', body: JSON.stringify(data), headers: { 'X-Admin-Pin': pin } })
+
+export const updateCompetition = (id, data, pin) =>
+  request(`/competitions/${id}`, { method: 'PUT', body: JSON.stringify(data), headers: { 'X-Admin-Pin': pin } })
+
+export const deleteCompetition = (id, pin) =>
+  request(`/competitions/${id}`, { method: 'DELETE', headers: { 'X-Admin-Pin': pin } })
+
+export const getCompetitionStats = (id) => request(`/competitions/${id}/stats`)
