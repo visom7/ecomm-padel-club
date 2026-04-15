@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getMatchday, submitResult } from '../services/api'
+import { getMatchday, getPlayers, submitResult, handleAdminError } from '../services/api'
 import { getAdminPin } from '../context/adminPin'
 
 const EMPTY_PAIR = { sets: [{ gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }] }
@@ -19,6 +19,7 @@ export default function ResultFormPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
 
+  const [allPlayers, setAllPlayers] = useState([])
   const [outcome, setOutcome] = useState(null)
   const [finalPlayers, setFinalPlayers] = useState([])
   const [pairs, setPairs] = useState([
@@ -28,12 +29,19 @@ export default function ResultFormPage() {
   ])
 
   useEffect(() => {
-    getMatchday(id).then(data => {
+    getMatchday(id).then(async data => {
       setMatchday(data)
+
+      // Player list: registrations if any, otherwise all club players
+      if (data.registrations.length > 0) {
+        setAllPlayers(data.registrations.map(r => r.name))
+      } else {
+        const players = await getPlayers()
+        setAllPlayers(players.map(p => p.name))
+      }
 
       const existing = data.matchResult
       if (existing) {
-        // Pre-populate from existing result
         setOutcome(existing.outcome || null)
         setFinalPlayers(existing.finalPlayers || [])
         const pairToForm = (pair) => pair
@@ -86,7 +94,7 @@ export default function ResultFormPage() {
       }, getAdminPin())
       navigate(`/matchdays/${id}`)
     } catch (err) {
-      setError('Error al guardar: ' + err.message)
+      handleAdminError(err, navigate, setError)
     } finally {
       setSaving(false)
     }
@@ -98,7 +106,7 @@ export default function ResultFormPage() {
     </div>
   )
 
-  const allPlayers = matchday?.registrations.map(r => r.name) || []
+  const allPlayerNames = allPlayers
 
   return (
     <div className="px-4 py-5">
@@ -138,7 +146,7 @@ export default function ResultFormPage() {
         <div className="card">
           <p className="text-sm font-semibold text-gray-700 mb-3">¿Quién jugó finalmente?</p>
           <div className="flex flex-wrap gap-2">
-            {allPlayers.map(name => (
+            {allPlayerNames.map(name => (
               <button
                 key={name}
                 type="button"
