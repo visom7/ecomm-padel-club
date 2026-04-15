@@ -1,14 +1,20 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getPlayerGlobalStats } from '../services/api'
+import { useSession } from '../context/SessionContext'
 
 export default function PlayerStatsPage() {
   const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [sortField, setSortField] = useState('jugados')
   const navigate = useNavigate()
+  const { session } = useSession()
 
   useEffect(() => {
+    if (!session?.isAdmin) {
+      navigate('/')
+      return
+    }
     getPlayerGlobalStats()
       .then(setPlayers)
       .finally(() => setLoading(false))
