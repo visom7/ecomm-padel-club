@@ -3,6 +3,8 @@ package com.ecommpadel.club.model;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,7 +18,11 @@ public class Matchday {
     private String id;
     private String title;
     private Status status = Status.OPEN;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
+
+    @JsonFormat(pattern = "HH:mm")
     private LocalTime time;
     private String venue;
     private String competition;
