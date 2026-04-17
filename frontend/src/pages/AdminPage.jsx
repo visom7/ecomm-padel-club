@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getCompetitions, getCompetitionStats, deleteCompetition, getBeerRounds, getBeerRoundStats, markBeerRoundPaid, handleAdminError } from '../services/api'
+import { getCompetitions, getCompetitionStats, deleteCompetition, updateCompetition, getBeerRounds, getBeerRoundStats, markBeerRoundPaid, handleAdminError } from '../services/api'
 import { getAdminPin } from '../context/adminPin'
 import { useSession } from '../context/SessionContext'
 
@@ -12,6 +12,7 @@ export default function AdminPage() {
   const [showBeerStats, setShowBeerStats] = useState(false)
   const [loading, setLoading] = useState(true)
   const [deletingId, setDeletingId] = useState(null)
+  const [togglingId, setTogglingId] = useState(null)
   const [payingId, setPayingId] = useState(null)
   const navigate = useNavigate()
   const { session } = useSession()
@@ -55,6 +56,18 @@ export default function AdminPage() {
       handleAdminError(err, navigate)
     } finally {
       setPayingId(null)
+    }
+  }
+
+  const handleToggleActive = async (c) => {
+    setTogglingId(c.id)
+    try {
+      const updated = await updateCompetition(c.id, { name: c.name, color: c.color, active: !c.active }, getAdminPin())
+      setCompetitions(prev => prev.map(x => x.id === c.id ? { ...x, active: updated?.active ?? !c.active } : x))
+    } catch (err) {
+      handleAdminError(err, navigate)
+    } finally {
+      setTogglingId(null)
     }
   }
 
@@ -110,7 +123,7 @@ export default function AdminPage() {
               <div>
                 <p className="text-xs text-green-600 font-semibold uppercase tracking-widest mb-2">✅ Abiertas</p>
                 <div className="space-y-3">
-                  {openCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} />)}
+                  {openCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} onToggleActive={() => handleToggleActive(c)} toggling={togglingId === c.id} />)}
                 </div>
               </div>
             )}
@@ -118,7 +131,7 @@ export default function AdminPage() {
               <div>
                 <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-2">🔒 Cerradas</p>
                 <div className="space-y-3">
-                  {closedCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} />)}
+                  {closedCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} onToggleActive={() => handleToggleActive(c)} toggling={togglingId === c.id} />)}
                 </div>
               </div>
             )}
@@ -201,8 +214,9 @@ export default function AdminPage() {
   )
 }
 
-function CompetitionCard({ c, rec, onStats, onEdit, onDelete, deleting }) {
+function CompetitionCard({ c, rec, onStats, onEdit, onDelete, deleting, onToggleActive, toggling }) {
   const totalPlayed = rec ? rec.totalWins + rec.totalLosses + rec.totalDraws : 0
+  const isOpen = c.active !== false
   return (
     <div className="card">
       <div className="flex items-center gap-3 mb-2">
@@ -220,6 +234,17 @@ function CompetitionCard({ c, rec, onStats, onEdit, onDelete, deleting }) {
       <div className="flex items-center gap-2">
         <button onClick={onStats} className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 active:bg-blue-100">Estadísticas</button>
         <button onClick={onEdit} className="flex-1 text-center text-xs font-medium text-gray-600 bg-gray-100 rounded-lg py-2 active:bg-gray-200">Editar</button>
+        <button
+          onClick={onToggleActive}
+          disabled={toggling}
+          className={`flex-1 text-center text-xs font-medium rounded-lg py-2 disabled:opacity-40 transition-colors ${
+            isOpen
+              ? 'text-orange-600 bg-orange-50 active:bg-orange-100'
+              : 'text-green-600 bg-green-50 active:bg-green-100'
+          }`}
+        >
+          {toggling ? '…' : isOpen ? '🔒 Cerrar' : '🔓 Reabrir'}
+        </button>
         <button onClick={onDelete} disabled={deleting} className="flex-1 text-center text-xs font-medium text-red-600 bg-red-50 rounded-lg py-2 active:bg-red-100 disabled:opacity-40">
           {deleting ? '…' : 'Eliminar'}
         </button>
