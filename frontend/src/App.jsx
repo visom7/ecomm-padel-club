@@ -11,6 +11,7 @@ import AdminPage from './pages/AdminPage'
 import CompetitionFormPage from './pages/CompetitionFormPage'
 import CompetitionStatsPage from './pages/CompetitionStatsPage'
 import PlayerStatsPage from './pages/PlayerStatsPage'
+import BeerRoundsPage from './pages/BeerRoundsPage'
 import Layout from './components/Layout'
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
               <Route path="/admin/competitions/:id/edit" element={<CompetitionFormPage />} />
               <Route path="/admin/competitions/:id/stats" element={<CompetitionStatsPage />} />
               <Route path="/players/stats" element={<PlayerStatsPage />} />
+              <Route path="/cubos" element={<BeerRoundsPage />} />
             </Route>
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

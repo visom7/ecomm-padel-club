@@ -53,7 +53,7 @@ export default function MatchdaysPage() {
   return (
     <div className="px-4 py-5">
       {/* Beer round counter */}
-      <BeerCounter count={beerCount} />
+      <BeerCounter count={beerCount} navigate={navigate} />
 
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-xl font-bold text-gray-800">Convocatorias</h1>
@@ -116,11 +116,14 @@ function EmptyState() {
   )
 }
 
-function BeerCounter({ count }) {
+function BeerCounter({ count, navigate }) {
   const digits = String(Math.min(count, 99)).padStart(2, '0').split('')
   return (
     <div className="flex justify-end mb-5">
-      <div className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3 shadow-inner w-1/2">
+      <div
+        onClick={() => navigate('/cubos')}
+        className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3 shadow-inner w-1/2 cursor-pointer hover:bg-gray-700 transition-colors active:scale-95"
+      >
         {/* Digit display */}
         <div className="flex gap-1">
           {digits.map((d, i) => (
