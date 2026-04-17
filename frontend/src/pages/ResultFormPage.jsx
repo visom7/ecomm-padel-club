@@ -22,6 +22,8 @@ export default function ResultFormPage() {
   const [allPlayers, setAllPlayers] = useState([])
   const [outcome, setOutcome] = useState(null)
   const [finalPlayers, setFinalPlayers] = useState([])
+  const [beerRoundPlayers, setBeerRoundPlayers] = useState([])
+  const [showBeerSection, setShowBeerSection] = useState(false)
   const [pairs, setPairs] = useState([
     structuredClone(EMPTY_PAIR),
     structuredClone(EMPTY_PAIR),
@@ -44,6 +46,9 @@ export default function ResultFormPage() {
       if (existing) {
         setOutcome(existing.outcome || null)
         setFinalPlayers(existing.finalPlayers || [])
+        const existingBeer = existing.beerRoundPlayers || []
+        setBeerRoundPlayers(existingBeer)
+        setShowBeerSection(existingBeer.length > 0)
         const pairToForm = (pair) => pair
           ? { sets: [0, 1, 2].map(i => pair.sets?.[i]
               ? { gamesHome: pair.sets[i].gamesHome, gamesAway: pair.sets[i].gamesAway }
@@ -60,6 +65,14 @@ export default function ResultFormPage() {
 
   const togglePlayer = (name) => {
     setFinalPlayers(prev =>
+      prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
+    )
+    // Remove from beer round if deselected as final player
+    setBeerRoundPlayers(prev => prev.filter(n => n !== name))
+  }
+
+  const toggleBeerPlayer = (name) => {
+    setBeerRoundPlayers(prev =>
       prev.includes(name) ? prev.filter(n => n !== name) : [...prev, name]
     )
   }
@@ -81,6 +94,7 @@ export default function ResultFormPage() {
       setError('Debes seleccionar exactamente 6 jugadores')
       return
     }
+    setSaving(true)
     try {
       const buildPair = (pair) => ({
         sets: pair.sets
@@ -90,6 +104,7 @@ export default function ResultFormPage() {
       await submitResult(id, {
         outcome,
         finalPlayers,
+        beerRoundPlayers: showBeerSection ? beerRoundPlayers : [],
         pair1: buildPair(pairs[0]),
         pair2: buildPair(pairs[1]),
         pair3: buildPair(pairs[2]),
@@ -107,8 +122,6 @@ export default function ResultFormPage() {
       <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
-
-  const allPlayerNames = allPlayers
 
   return (
     <div className="px-4 py-5">
@@ -157,7 +170,7 @@ export default function ResultFormPage() {
             </span>
           </div>
           <div className="flex flex-wrap gap-2">
-            {allPlayerNames.map(name => {
+            {allPlayers.map(name => {
               const selected = finalPlayers.includes(name)
               const maxReached = !selected && finalPlayers.length >= 6
               return (
@@ -221,6 +234,61 @@ export default function ResultFormPage() {
             </div>
           </div>
         ))}
+
+        {/* Beer round section */}
+        <div className="card">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold text-gray-700">🍺 ¿Alguien paga un cubo?</p>
+            <button
+              type="button"
+              onClick={() => {
+                setShowBeerSection(v => !v)
+                if (showBeerSection) setBeerRoundPlayers([])
+              }}
+              className={`text-xs font-semibold px-3 py-1 rounded-full border transition-colors ${
+                showBeerSection
+                  ? 'bg-amber-400 border-amber-400 text-white'
+                  : 'border-amber-300 text-amber-600'
+              }`}
+            >
+              {showBeerSection ? 'Sí' : 'No'}
+            </button>
+          </div>
+
+          {showBeerSection && finalPlayers.length === 6 && (
+            <div className="mt-3">
+              <p className="text-xs text-gray-400 mb-2">Selecciona quién debe un cubo</p>
+              <div className="flex flex-wrap gap-2">
+                {finalPlayers.map(name => {
+                  const selected = beerRoundPlayers.includes(name)
+                  return (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => toggleBeerPlayer(name)}
+                      className={`px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                        selected
+                          ? 'bg-amber-400 border-amber-400 text-white'
+                          : 'border-amber-200 text-amber-700'
+                      }`}
+                    >
+                      {selected ? '🍺 ' : ''}{name}
+                    </button>
+                  )
+                })}
+              </div>
+              {beerRoundPlayers.length > 0 && (
+                <p className="text-xs text-amber-600 mt-2 font-medium">
+                  {beerRoundPlayers.length} cubo{beerRoundPlayers.length !== 1 ? 's' : ''} pendiente{beerRoundPlayers.length !== 1 ? 's' : ''}
+                </p>
+              )}
+            </div>
+          )}
+
+          {showBeerSection && finalPlayers.length !== 6 && (
+            <p className="text-xs text-gray-400 mt-2">Selecciona primero los 6 jugadores</p>
+          )}
+        </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
 

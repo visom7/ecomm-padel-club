@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getActiveMatchdays, deleteMatchday, handleAdminError } from '../services/api'
+import { getActiveMatchdays, deleteMatchday, getBeerRounds, handleAdminError } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { getAdminPin } from '../context/adminPin'
 import MatchdayCard from '../components/MatchdayCard'
@@ -9,18 +9,23 @@ export default function MatchdaysPage() {
   const [matchdays, setMatchdays] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [beerCount, setBeerCount] = useState(0)
   const { session } = useSession()
   const navigate = useNavigate()
 
   const load = () => {
     setLoading(true)
-    getActiveMatchdays()
-      .then(data => {
+    Promise.all([
+      getActiveMatchdays(),
+      getBeerRounds(),
+    ])
+      .then(([data, beers]) => {
         setMatchdays(data.sort((a, b) => {
           if (!a.date) return 1
           if (!b.date) return -1
           return new Date(a.date) - new Date(b.date)
         }))
+        setBeerCount(beers.length)
       })
       .catch(() => setError('No se pudo cargar las convocatorias'))
       .finally(() => setLoading(false))
@@ -47,6 +52,9 @@ export default function MatchdaysPage() {
 
   return (
     <div className="px-4 py-5">
+      {/* Beer round counter */}
+      <BeerCounter count={beerCount} />
+
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-xl font-bold text-gray-800">Convocatorias</h1>
         {session?.isAdmin && (
@@ -104,6 +112,43 @@ function EmptyState() {
       </svg>
       <p className="font-medium">No hay convocatorias abiertas</p>
       <p className="text-sm mt-1">Los administradores pueden crear una nueva</p>
+    </div>
+  )
+}
+
+function BeerCounter({ count }) {
+  const digits = String(Math.min(count, 99)).padStart(2, '0').split('')
+  return (
+    <div className="mb-5">
+      <div className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3 shadow-inner">
+        {/* Digit display */}
+        <div className="flex gap-1">
+          {digits.map((d, i) => (
+            <div
+              key={i}
+              className="w-9 h-12 bg-gray-900 border border-gray-600 rounded-md flex items-center justify-center"
+              style={{ boxShadow: 'inset 0 2px 6px rgba(0,0,0,0.7)' }}
+            >
+              <span
+                className="text-2xl font-bold text-amber-400 leading-none"
+                style={{ fontFamily: "'Courier New', monospace", textShadow: '0 0 8px rgba(251,191,36,0.6)' }}
+              >
+                {d}
+              </span>
+            </div>
+          ))}
+        </div>
+        {/* Label */}
+        <div className="flex-1">
+          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold leading-none mb-0.5">Contador de</p>
+          <p className="text-sm font-bold text-amber-400 leading-none">cubos 🍺</p>
+          {count === 0 ? (
+            <p className="text-xs text-gray-500 mt-1">Sin cubos pendientes</p>
+          ) : (
+            <p className="text-xs text-gray-400 mt-1">{count} pendiente{count !== 1 ? 's' : ''}</p>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

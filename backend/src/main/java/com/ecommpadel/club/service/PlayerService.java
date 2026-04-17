@@ -54,8 +54,8 @@ public class PlayerService {
     }
 
     public List<Player> findAll() {
-        log.debug("Fetching all players");
-        return playerRepository.findAll();
+        log.debug("Fetching all players ordered by name");
+        return playerRepository.findAllByOrderByNameAsc();
     }
 
     public Optional<Player> findByName(String name) {

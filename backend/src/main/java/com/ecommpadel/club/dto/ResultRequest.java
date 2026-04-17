@@ -9,6 +9,7 @@ public class ResultRequest {
 
     private MatchResult.Outcome outcome;
     private List<String> finalPlayers;
+    private List<String> beerRoundPlayers;
     private PairResult pair1;
     private PairResult pair2;
     private PairResult pair3;
@@ -18,6 +19,9 @@ public class ResultRequest {
 
     public List<String> getFinalPlayers() { return finalPlayers; }
     public void setFinalPlayers(List<String> finalPlayers) { this.finalPlayers = finalPlayers; }
+
+    public List<String> getBeerRoundPlayers() { return beerRoundPlayers; }
+    public void setBeerRoundPlayers(List<String> beerRoundPlayers) { this.beerRoundPlayers = beerRoundPlayers; }
 
     public PairResult getPair1() { return pair1; }
     public void setPair1(PairResult pair1) { this.pair1 = pair1; }
