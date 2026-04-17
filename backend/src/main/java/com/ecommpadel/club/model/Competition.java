@@ -12,6 +12,7 @@ public class Competition {
     private String id;
     private String name;
     private String color;
+    private boolean active = true;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     public Competition() {}
@@ -24,6 +25,9 @@ public class Competition {
 
     public String getColor() { return color; }
     public void setColor(String color) { this.color = color; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

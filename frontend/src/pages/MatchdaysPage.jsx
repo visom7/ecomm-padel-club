@@ -119,8 +119,8 @@ function EmptyState() {
 function BeerCounter({ count }) {
   const digits = String(Math.min(count, 99)).padStart(2, '0').split('')
   return (
-    <div className="mb-5">
-      <div className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3 shadow-inner">
+    <div className="flex justify-end mb-5">
+      <div className="flex items-center gap-3 bg-gray-800 rounded-2xl px-4 py-3 shadow-inner w-1/2">
         {/* Digit display */}
         <div className="flex gap-1">
           {digits.map((d, i) => (
@@ -139,13 +139,13 @@ function BeerCounter({ count }) {
           ))}
         </div>
         {/* Label */}
-        <div className="flex-1">
-          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold leading-none mb-0.5">Contador de</p>
+        <div className="flex-1 min-w-0">
+          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold leading-none mb-0.5 truncate">Contador de</p>
           <p className="text-sm font-bold text-amber-400 leading-none">cubos 🍺</p>
           {count === 0 ? (
-            <p className="text-xs text-gray-500 mt-1">Sin cubos pendientes</p>
+            <p className="text-xs text-gray-500 mt-1 truncate">Sin pendientes</p>
           ) : (
-            <p className="text-xs text-gray-400 mt-1">{count} pendiente{count !== 1 ? 's' : ''}</p>
+            <p className="text-xs text-gray-400 mt-1">{count} pend.</p>
           )}
         </div>
       </div>

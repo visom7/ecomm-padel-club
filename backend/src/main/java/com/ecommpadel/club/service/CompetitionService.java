@@ -133,5 +133,6 @@ public class CompetitionService {
     private void applyRequest(Competition competition, CompetitionRequest request) {
         competition.setName(request.getName());
         competition.setColor(request.getColor());
+        competition.setActive(request.isActive());
     }
 }

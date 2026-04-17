@@ -14,7 +14,7 @@ export default function CompetitionFormPage() {
   const navigate = useNavigate()
   const isEditing = Boolean(id)
 
-  const [form, setForm] = useState({ name: '', color: '#3b82f6' })
+  const [form, setForm] = useState({ name: '', color: '#3b82f6', active: true })
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -24,7 +24,7 @@ export default function CompetitionFormPage() {
     getCompetitions().then(list => {
       const comp = list.find(c => c.id === id)
       if (comp) {
-        setForm({ name: comp.name || '', color: comp.color || '#3b82f6' })
+        setForm({ name: comp.name || '', color: comp.color || '#3b82f6', active: comp.active !== false })
       }
       setLoading(false)
     })
@@ -40,7 +40,7 @@ export default function CompetitionFormPage() {
     setError(null)
     try {
       const pin = getAdminPin()
-      const payload = { name: form.name.trim(), color: form.color }
+      const payload = { name: form.name.trim(), color: form.color, active: form.active }
       if (isEditing) {
         await updateCompetition(id, payload, pin)
       } else {
@@ -129,6 +129,23 @@ export default function CompetitionFormPage() {
         </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        {/* Active/closed toggle */}
+        <div className="flex items-center justify-between py-3 border-t border-gray-100">
+          <div>
+            <p className="text-sm font-semibold text-gray-700">Estado</p>
+            <p className="text-xs text-gray-400">{form.active ? 'La competición está activa' : 'La competición está cerrada'}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setForm(f => ({ ...f, active: !f.active }))}
+            className={`relative w-12 h-6 rounded-full transition-colors ${form.active ? 'bg-green-500' : 'bg-gray-300'}`}
+          >
+            <span
+              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-6' : 'translate-x-0.5'}`}
+            />
+          </button>
+        </div>
 
         <button type="submit" disabled={saving} className="btn-pink w-full py-3 disabled:opacity-50">
           {saving ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear competición'}
