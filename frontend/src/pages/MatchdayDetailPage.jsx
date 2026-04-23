@@ -81,6 +81,8 @@ export default function MatchdayDetailPage() {
   const respondedIds = new Set(matchday.registrations.map(r => r.playerId))
   const noResponse = allPlayers.filter(p => !respondedIds.has(p.id))
   const isOpen = matchday.status === 'OPEN'
+  const isPlayed = matchday.status === 'PLAYED'
+  const finalPlayers = matchday.matchResult?.finalPlayers || []
 
   return (
     <div className="px-4 py-5 space-y-4">
@@ -125,6 +127,24 @@ export default function MatchdayDetailPage() {
           {matchday.round && <InfoRow icon="🔢" label="Ronda" value={matchday.round} />}
         </dl>
       </div>
+
+      {/* Final players — only for played matchdays */}
+      {isPlayed && finalPlayers.length > 0 && (
+        <div className="card">
+          <h2 className="font-semibold text-gray-700 mb-3">
+            Jugaron ({finalPlayers.length})
+          </h2>
+          <ul className="space-y-1">
+            {finalPlayers.map(name => (
+              <li key={name} className="flex items-center gap-2 text-sm text-gray-700">
+                <span className="w-2 h-2 rounded-full bg-padel-pink shrink-0" />
+                {name}
+                {name === session?.name && <span className="text-xs text-gray-400">(tú)</span>}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Response buttons — only for open matchdays */}
       {isOpen && (
