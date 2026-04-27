@@ -31,6 +31,11 @@ public class BeerRoundController {
         return beerRoundService.findPending();
     }
 
+    @GetMapping("/history")
+    public List<BeerRound> listHistory() {
+        return beerRoundService.findAllHistory();
+    }
+
     @GetMapping("/stats")
     public List<BeerRoundStatsDto> stats() {
         return beerRoundService.getStats();

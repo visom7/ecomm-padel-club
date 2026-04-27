@@ -8,4 +8,5 @@ import java.util.List;
 public interface BeerRoundRepository extends MongoRepository<BeerRound, String> {
     List<BeerRound> findByPaidFalseOrderByCreatedAtAsc();
     void deleteByMatchdayIdAndPaidFalse(String matchdayId);
+    List<BeerRound> findAllByOrderByCreatedAtDesc();
 }

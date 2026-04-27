@@ -25,6 +25,10 @@ public class BeerRoundService {
         return beerRoundRepository.findByPaidFalseOrderByCreatedAtAsc();
     }
 
+    public List<BeerRound> findAllHistory() {
+        return beerRoundRepository.findAllByOrderByCreatedAtDesc();
+    }
+
     public BeerRound create(String playerId, String playerName, String matchdayId, String matchdayTitle) {
         BeerRound round = new BeerRound(playerId, playerName, matchdayId, matchdayTitle);
         BeerRound saved = beerRoundRepository.save(round);
