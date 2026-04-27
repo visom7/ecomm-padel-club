@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getBeerRounds } from '../services/api'
+import { getBeerRoundsHistory } from '../services/api'
+
+function formatDate(isoString) {
+  if (!isoString) return ''
+  return new Date(isoString).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 export default function BeerRoundsPage() {
   const [rounds, setRounds] = useState([])
@@ -9,20 +14,13 @@ export default function BeerRoundsPage() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    getBeerRounds()
+    getBeerRoundsHistory()
       .then(data => setRounds(data))
-      .catch(() => setError('No se pudo cargar los cubos pendientes'))
+      .catch(() => setError('No se pudo cargar el historial de cubos'))
       .finally(() => setLoading(false))
   }, [])
 
-  // Group by player name
-  const byPlayer = rounds.reduce((acc, r) => {
-    if (!acc[r.playerName]) acc[r.playerName] = []
-    acc[r.playerName].push(r)
-    return acc
-  }, {})
-
-  const players = Object.keys(byPlayer).sort((a, b) => a.localeCompare(b, 'es'))
+  const pending = rounds.filter(r => !r.paid).length
 
   return (
     <div className="px-4 py-5">
@@ -37,9 +35,11 @@ export default function BeerRoundsPage() {
           </svg>
         </button>
         <div>
-          <h1 className="text-xl font-bold text-gray-800">Cubos pendientes 🍺</h1>
+          <h1 className="text-xl font-bold text-gray-800">Historial de cubos 🍺</h1>
           {!loading && !error && (
-            <p className="text-sm text-gray-400">{rounds.length} cubo{rounds.length !== 1 ? 's' : ''} en total</p>
+            <p className="text-sm text-gray-400">
+              {rounds.length} cubo{rounds.length !== 1 ? 's' : ''} · {pending} pendiente{pending !== 1 ? 's' : ''}
+            </p>
           )}
         </div>
       </div>
@@ -55,55 +55,31 @@ export default function BeerRoundsPage() {
       {!loading && !error && rounds.length === 0 && (
         <div className="text-center pt-16 text-gray-400">
           <span className="text-6xl block mb-4">🍻</span>
-          <p className="font-medium text-gray-600">¡Sin cubos pendientes!</p>
-          <p className="text-sm mt-1">Todo el mundo está al día</p>
+          <p className="font-medium text-gray-600">¡Sin cubos registrados!</p>
+          <p className="text-sm mt-1">Aquí aparecerá el historial</p>
         </div>
       )}
 
-      {!loading && !error && players.length > 0 && (
-        <div className="space-y-3">
-          {players.map(playerName => {
-            const playerRounds = byPlayer[playerName]
-            return (
-              <div key={playerName} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                {/* Player header */}
-                <div className="flex items-center gap-3 px-4 py-3 bg-amber-50 border-b border-amber-100">
-                  <div className="w-9 h-9 rounded-full bg-amber-400 flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                    {playerName.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-800">{playerName}</p>
-                    <p className="text-xs text-amber-600 font-medium">
-                      {playerRounds.length} cubo{playerRounds.length !== 1 ? 's' : ''} pendiente{playerRounds.length !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                  <span className="w-8 h-8 rounded-full bg-amber-400 text-white text-sm font-bold flex items-center justify-center shadow-sm">
-                    {playerRounds.length}
-                  </span>
-                </div>
-
-                {/* Match details */}
-                <ul className="divide-y divide-gray-50">
-                  {playerRounds.map(r => (
-                    <li key={r.id} className="flex items-center gap-3 px-4 py-2.5">
-                      <span className="text-lg">🍺</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-gray-700 font-medium truncate">
-                          {r.matchdayTitle || 'Partido desconocido'}
-                        </p>
-                        {r.createdAt && (
-                          <p className="text-xs text-gray-400">
-                            {new Date(r.createdAt).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
+      {!loading && !error && rounds.length > 0 && (
+        <ul className="space-y-2">
+          {rounds.map(r => (
+            <li key={r.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-3">
+              <span className="text-xl">🍺</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-gray-800 truncate">{r.playerName}</p>
+                <p className="text-xs text-gray-400 truncate">{r.matchdayTitle || 'Partido desconocido'} · {formatDate(r.createdAt)}</p>
               </div>
-            )
-          })}
-        </div>
+              {r.paid ? (
+                <div className="text-right shrink-0">
+                  <span className="inline-block text-xs font-semibold text-green-600 bg-green-50 rounded-full px-2.5 py-0.5">Pagado</span>
+                  {r.paidAt && <p className="text-xs text-gray-400 mt-0.5">{formatDate(r.paidAt)}</p>}
+                </div>
+              ) : (
+                <span className="inline-block text-xs font-semibold text-amber-600 bg-amber-50 rounded-full px-2.5 py-0.5 shrink-0">Pendiente</span>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   )
