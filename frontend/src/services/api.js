@@ -82,5 +82,6 @@ export const getPlayerGlobalStats = () => request('/players/stats')
 // Beer rounds
 export const getBeerRounds = () => request('/beer-rounds')
 export const getBeerRoundStats = () => request('/beer-rounds/stats')
+export const getBeerRoundsHistory = () => request('/beer-rounds/history')
 export const markBeerRoundPaid = (id, pin) =>
   request(`/beer-rounds/${id}`, { method: 'DELETE', headers: { 'X-Admin-Pin': pin } })
