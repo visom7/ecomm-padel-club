@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { getActiveMatchdays, deleteMatchday, getBeerRounds, handleAdminError } from '../services/api'
+import { getActiveMatchdays, deleteMatchday, getBeerRoundsHistory, handleAdminError } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { getAdminPin } from '../context/adminPin'
 import MatchdayCard from '../components/MatchdayCard'
@@ -10,6 +10,7 @@ export default function MatchdaysPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [beerCount, setBeerCount] = useState(0)
+  const [beerPending, setBeerPending] = useState(0)
   const { session } = useSession()
   const navigate = useNavigate()
 
@@ -17,7 +18,7 @@ export default function MatchdaysPage() {
     setLoading(true)
     Promise.all([
       getActiveMatchdays(),
-      getBeerRounds(),
+      getBeerRoundsHistory(),
     ])
       .then(([data, beers]) => {
         setMatchdays(data.sort((a, b) => {
@@ -26,6 +27,7 @@ export default function MatchdaysPage() {
           return new Date(a.date) - new Date(b.date)
         }))
         setBeerCount(beers.length)
+        setBeerPending(beers.filter(b => !b.paid).length)
       })
       .catch(() => setError('No se pudo cargar las convocatorias'))
       .finally(() => setLoading(false))
@@ -53,7 +55,7 @@ export default function MatchdaysPage() {
   return (
     <div className="px-4 py-5">
       {/* Beer round counter */}
-      <BeerCounter count={beerCount} navigate={navigate} />
+      <BeerCounter count={beerCount} pending={beerPending} navigate={navigate} />
 
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-xl font-bold text-gray-800">Convocatorias</h1>
@@ -116,7 +118,7 @@ function EmptyState() {
   )
 }
 
-function BeerCounter({ count, navigate }) {
+function BeerCounter({ count, pending, navigate }) {
   const digits = String(Math.min(count, 99)).padStart(2, '0').split('')
   return (
     <div className="flex justify-end mb-5">
@@ -145,10 +147,10 @@ function BeerCounter({ count, navigate }) {
         <div className="flex-1 min-w-0">
           <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold leading-none mb-0.5 truncate">Contador de</p>
           <p className="text-sm font-bold text-amber-400 leading-none">cubos 🍺</p>
-          {count === 0 ? (
+          {pending === 0 ? (
             <p className="text-xs text-gray-500 mt-1 truncate">Sin pendientes</p>
           ) : (
-            <p className="text-xs text-gray-400 mt-1">{count} pend.</p>
+            <p className="text-xs text-gray-400 mt-1">{pending} pendiente{pending !== 1 ? 's' : ''}</p>
           )}
         </div>
       </div>
