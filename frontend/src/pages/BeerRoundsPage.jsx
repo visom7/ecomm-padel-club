@@ -4,7 +4,8 @@ import { getBeerRoundsHistory } from '../services/api'
 
 function formatDate(isoString) {
   if (!isoString) return ''
-  return new Date(isoString).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
+  const d = new Date(isoString)
+  return isNaN(d.getTime()) ? '' : d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 export default function BeerRoundsPage() {
