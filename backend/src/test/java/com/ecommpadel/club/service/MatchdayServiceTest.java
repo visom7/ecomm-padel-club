@@ -28,6 +28,9 @@ class MatchdayServiceTest {
     @Mock
     private MatchdayRepository matchdayRepository;
 
+    @Mock
+    private BeerRoundService beerRoundService;
+
     @InjectMocks
     private MatchdayService matchdayService;
 
