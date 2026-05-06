@@ -1,0 +1,41 @@
+feature:
+  id: player-count
+  title: "Player Count Endpoint"
+  description: "Add a new endpoint GET /api/players/count that returns the total number of registered players as a plain integer."
+  created_at: "2026-05-06"
+
+tasks:
+  - id: task-1
+    title: "Add countPlayers method to PlayerService"
+    description: |
+      Add a public method `countPlayers()` to `PlayerService` that delegates to
+      `playerRepository.count()` (already available from MongoRepository) and returns a `long`.
+      Cover with a unit test in `PlayerServiceTest` verifying the delegated call and the returned value.
+    depends_on: []
+    status: pending
+    attempts: 0
+    max_attempts: 3
+    assigned_to: null
+
+  - id: task-2
+    title: "Expose GET /api/players/count endpoint in PlayerController"
+    description: |
+      Add a `@GetMapping("/count")` handler in `PlayerController` that calls
+      `playerService.countPlayers()` and returns the result as a plain integer with HTTP 200.
+      Cover with an integration test in `PlayerControllerIT` that verifies the endpoint returns
+      the correct count after seeding.
+    depends_on: [task-1]
+    status: pending
+    attempts: 0
+    max_attempts: 3
+    assigned_to: null
+
+review:
+  task-1:
+    status: null
+    issues: []
+    attempt: 0
+  task-2:
+    status: null
+    issues: []
+    attempt: 0
