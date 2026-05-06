@@ -123,6 +123,8 @@
                             </outputFormats>
                             <mutators>DEFAULTS</mutators>
                             <timestampedReports>false</timestampedReports>
+                            <mutationThreshold>54</mutationThreshold>
+                            <coverageThreshold>74</coverageThreshold>
                         </configuration>
                     </plugin>
                 </plugins>
