@@ -150,16 +150,140 @@ class MatchdayServiceTest {
     }
 
     @Test
-    void findActive_returnsOpenAndClosedMatchdays() {
+    void reopen_setsStatusBackToOpen() {
         Matchday closed = new Matchday();
+        closed.setId("matchday-1");
         closed.setStatus(Matchday.Status.CLOSED);
 
-        when(matchdayRepository.findByStatusIn(List.of(Matchday.Status.OPEN, Matchday.Status.CLOSED)))
-                .thenReturn(List.of(openMatchday, closed));
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(closed));
+        when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Matchday result = matchdayService.reopen("matchday-1");
+
+        assertThat(result.getStatus()).isEqualTo(Matchday.Status.OPEN);
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsOpen() {
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(openMatchday));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("CLOSED");
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsLive() {
+        Matchday live = new Matchday();
+        live.setId("matchday-1");
+        live.setStatus(Matchday.Status.LIVE);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(live));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsPlayed() {
+        Matchday played = new Matchday();
+        played.setId("matchday-1");
+        played.setStatus(Matchday.Status.PLAYED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(played));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void findActive_returnsOpenClosedAndLiveMatchdays() {
+        Matchday closed = new Matchday();
+        closed.setStatus(Matchday.Status.CLOSED);
+        Matchday live = new Matchday();
+        live.setStatus(Matchday.Status.LIVE);
+
+        when(matchdayRepository.findByStatusIn(
+                List.of(Matchday.Status.OPEN, Matchday.Status.CLOSED, Matchday.Status.LIVE)))
+                .thenReturn(List.of(openMatchday, closed, live));
 
         List<Matchday> result = matchdayService.findActive();
 
-        assertThat(result).hasSize(2);
+        assertThat(result).hasSize(3);
         assertThat(result).noneMatch(m -> m.getStatus() == Matchday.Status.PLAYED);
+    }
+
+    @Test
+    void goLive_setsStatusToLiveAndPersistsPartialResult() {
+        Matchday closed = new Matchday();
+        closed.setId("matchday-1");
+        closed.setStatus(Matchday.Status.CLOSED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(closed));
+        when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ResultRequest request = new ResultRequest();
+        request.setFinalPlayers(List.of("Ana", "Beto", "Cris", "Dani", "Eli", "Fer"));
+        request.setPair1(new PairResult());
+        request.setPair2(new PairResult());
+        request.setPair3(new PairResult());
+
+        Matchday result = matchdayService.goLive("matchday-1", request);
+
+        assertThat(result.getStatus()).isEqualTo(Matchday.Status.LIVE);
+        assertThat(result.getMatchResult()).isNotNull();
+        assertThat(result.getMatchResult().getOutcome()).isNull();
+        assertThat(result.getMatchResult().getFinalPlayers()).hasSize(6);
+        verifyNoInteractions(beerRoundService);
+    }
+
+    @Test
+    void goLive_acceptsTransitionFromLiveToLive() {
+        Matchday live = new Matchday();
+        live.setId("matchday-1");
+        live.setStatus(Matchday.Status.LIVE);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(live));
+        when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ResultRequest request = new ResultRequest();
+        request.setPair1(new PairResult());
+        request.setPair2(new PairResult());
+        request.setPair3(new PairResult());
+
+        Matchday result = matchdayService.goLive("matchday-1", request);
+
+        assertThat(result.getStatus()).isEqualTo(Matchday.Status.LIVE);
+    }
+
+    @Test
+    void goLive_rejectsWhenStatusIsOpen() {
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(openMatchday));
+
+        ResultRequest request = new ResultRequest();
+        request.setPair1(new PairResult());
+        request.setPair2(new PairResult());
+        request.setPair3(new PairResult());
+
+        assertThatThrownBy(() -> matchdayService.goLive("matchday-1", request))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("CLOSED or LIVE");
+    }
+
+    @Test
+    void goLive_rejectsWhenStatusIsPlayed() {
+        Matchday played = new Matchday();
+        played.setId("matchday-1");
+        played.setStatus(Matchday.Status.PLAYED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(played));
+
+        ResultRequest request = new ResultRequest();
+        request.setPair1(new PairResult());
+        request.setPair2(new PairResult());
+        request.setPair3(new PairResult());
+
+        assertThatThrownBy(() -> matchdayService.goLive("matchday-1", request))
+                .isInstanceOf(IllegalStateException.class);
     }
 }

@@ -1,6 +1,17 @@
 import { useSession } from '../context/SessionContext'
 import { useNavigate } from 'react-router-dom'
 import { clearAdminPin } from '../context/adminPin'
+import EcommLogo from './EcommLogo'
+
+function initials(name) {
+  if (!name) return '··'
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(part => part[0].toUpperCase())
+    .join('')
+}
 
 export default function Header() {
   const { session, logout } = useSession()
@@ -13,24 +24,28 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-gray-700 border-b border-gray-600 sticky top-0 z-10">
+    <header className="bg-daylight-cream sticky top-0 z-10">
       <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-        {/* Logo */}
-        <img src="/logo.png" alt="Ecomm Pädel Club" className="h-8 object-contain" />
+        <EcommLogo height={34} />
 
         {session && (
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-300">
-              {session.name}
+            <div className="flex items-center gap-2 bg-daylight-surface border border-daylight-hair rounded-full pl-1.5 pr-2.5 py-1">
+              <div className="w-[26px] h-[26px] rounded-full bg-daylight-pink text-white font-display font-bold text-xs flex items-center justify-center">
+                {initials(session.name)}
+              </div>
+              <span className="text-xs font-semibold text-daylight-ink truncate max-w-[110px]">
+                {session.name}
+              </span>
               {session.isAdmin && (
-                <span className="ml-1 text-xs bg-padel-pink text-white px-1.5 py-0.5 rounded-full">
+                <span className="font-mono text-[9px] font-bold tracking-[0.1em] uppercase bg-daylight-pink text-white px-1.5 py-0.5 rounded">
                   Admin
                 </span>
               )}
-            </span>
+            </div>
             <button
               onClick={handleLogout}
-              className="text-xs text-gray-400 underline"
+              className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub underline"
             >
               Cambiar
             </button>

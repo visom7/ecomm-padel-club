@@ -33,7 +33,7 @@ public class MatchdayService {
 
     public List<Matchday> findActive() {
         List<Matchday> matchdays = matchdayRepository.findByStatusIn(
-                List.of(Matchday.Status.OPEN, Matchday.Status.CLOSED)
+                List.of(Matchday.Status.OPEN, Matchday.Status.CLOSED, Matchday.Status.LIVE)
         );
         matchdays.forEach(this::sortRegistrations);
         return matchdays;
@@ -135,6 +135,40 @@ public class MatchdayService {
         Matchday matchday = findById(id);
         matchday.setStatus(Matchday.Status.CLOSED);
         log.info("Matchday closed: id={}", id);
+        return matchdayRepository.save(matchday);
+    }
+
+    public Matchday reopen(String id) {
+        Matchday matchday = findById(id);
+        if (matchday.getStatus() != Matchday.Status.CLOSED) {
+            throw new IllegalStateException(
+                    "Matchday must be CLOSED to reopen, was: " + matchday.getStatus());
+        }
+        matchday.setStatus(Matchday.Status.OPEN);
+        log.info("Matchday reopened: id={}", id);
+        return matchdayRepository.save(matchday);
+    }
+
+    public Matchday goLive(String id, ResultRequest request) {
+        Matchday matchday = findById(id);
+
+        Matchday.Status current = matchday.getStatus();
+        if (current != Matchday.Status.CLOSED && current != Matchday.Status.LIVE) {
+            throw new IllegalStateException(
+                    "Matchday must be CLOSED or LIVE to go live, was: " + current);
+        }
+
+        MatchResult result = new MatchResult(
+                request.getOutcome(),
+                request.getFinalPlayers(),
+                request.getPair1(),
+                request.getPair2(),
+                request.getPair3()
+        );
+        matchday.setMatchResult(result);
+        matchday.setStatus(Matchday.Status.LIVE);
+        log.info("Live snapshot saved: matchdayId={}", id);
+
         return matchdayRepository.save(matchday);
     }
 

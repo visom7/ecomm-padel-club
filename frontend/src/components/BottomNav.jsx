@@ -1,54 +1,91 @@
 import { NavLink } from 'react-router-dom'
 import { useSession } from '../context/SessionContext'
 
+function NavIcon({ kind }) {
+  const props = {
+    width: 16,
+    height: 16,
+    viewBox: '0 0 24 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    strokeWidth: 2,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  }
+  if (kind === 'calendar') return (
+    <svg {...props}>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M8 3v4M16 3v4M3 10h18" />
+    </svg>
+  )
+  if (kind === 'trophy') return (
+    <svg {...props}>
+      <path d="M7 4h10v4a5 5 0 1 1-10 0V4z" />
+      <path d="M5 6H3v2a3 3 0 0 0 3 3M19 6h2v2a3 3 0 0 1-3 3M9 21h6M12 17v4" />
+    </svg>
+  )
+  if (kind === 'chart') return (
+    <svg {...props}>
+      <path d="M4 20V10M10 20V4M16 20v-8M22 20H2" />
+    </svg>
+  )
+  if (kind === 'live') return (
+    <svg {...props}>
+      <circle cx="12" cy="12" r="3" fill="currentColor" />
+      <path d="M7.05 7.05a7 7 0 0 0 0 9.9M16.95 7.05a7 7 0 0 1 0 9.9M3.5 3.5a12 12 0 0 0 0 17M20.5 3.5a12 12 0 0 1 0 17" />
+    </svg>
+  )
+  // user / admin fallback
+  return (
+    <svg {...props}>
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" />
+    </svg>
+  )
+}
+
+function NavTab({ to, icon, label }) {
+  return (
+    <NavLink
+      to={to}
+      className="flex flex-col items-center gap-1 flex-1"
+    >
+      {({ isActive }) => (
+        <>
+          <div
+            className={
+              'w-8 h-8 rounded-xl flex items-center justify-center transition-colors ' +
+              (isActive
+                ? 'bg-daylight-pink text-white'
+                : 'bg-transparent text-daylight-ink-sub')
+            }
+          >
+            <NavIcon kind={icon} />
+          </div>
+          <span
+            className={
+              'font-sans text-[9px] font-bold tracking-wider uppercase ' +
+              (isActive ? 'text-daylight-ink' : 'text-daylight-ink-sub')
+            }
+          >
+            {label}
+          </span>
+        </>
+      )}
+    </NavLink>
+  )
+}
+
 export default function BottomNav() {
   const { session } = useSession()
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 z-10 safe-area-inset-bottom">
-      <div className="max-w-lg mx-auto flex">
-        <NavLink
-          to="/matchdays"
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-3 gap-0.5 text-xs font-medium transition-colors ` +
-            (isActive ? 'text-padel-pink' : 'text-gray-400')
-          }
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Convocatorias
-        </NavLink>
-
-        <NavLink
-          to="/played"
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center py-3 gap-0.5 text-xs font-medium transition-colors ` +
-            (isActive ? 'text-padel-pink' : 'text-gray-400')
-          }
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round"
-              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-          </svg>
-          Partidos
-        </NavLink>
-
-        {session?.isAdmin && (
-          <NavLink
-            to="/admin"
-            className={({ isActive }) =>
-              `flex-1 flex flex-col items-center py-3 gap-0.5 text-xs font-medium transition-colors ` +
-              (isActive ? 'text-padel-pink' : 'text-gray-400')
-            }
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            Admin
-          </NavLink>
-        )}
+    <nav className="fixed bottom-0 left-0 right-0 bg-daylight-surface border-t border-daylight-hair z-10">
+      <div className="max-w-lg mx-auto pt-2.5 pb-5 px-4 flex justify-around">
+        <NavTab to="/matchdays" icon="calendar" label="Convocatorias" />
+        <NavTab to="/live" icon="live" label="Directo" />
+        <NavTab to="/played" icon="trophy" label="Partidos" />
+        <NavTab to="/players/stats" icon="chart" label="Stats" />
+        {session?.isAdmin && <NavTab to="/admin" icon="user" label="Admin" />}
       </div>
     </nav>
   )

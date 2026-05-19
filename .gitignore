@@ -36,3 +36,8 @@ Thumbs.db
 # Logs
 *.log
 logs/
+
+# Claude Code local config and session notes
+.claude/
+frontend/.claude/
+handoff/

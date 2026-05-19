@@ -31,7 +31,7 @@ public class Matchday {
     private List<PlayerResponse> registrations = new ArrayList<>();
     private MatchResult matchResult;
 
-    public enum Status { OPEN, CLOSED, PLAYED }
+    public enum Status { OPEN, CLOSED, LIVE, PLAYED }
 
     public Matchday() {}
 

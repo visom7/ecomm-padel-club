@@ -4,6 +4,12 @@ import { getPlayedMatchdays } from '../services/api'
 import { useCompetition } from '../context/CompetitionsContext'
 import { useSession } from '../context/SessionContext'
 
+const OUTCOME_BADGE = {
+  WIN:  { label: 'VICTORIA', cls: 'bg-daylight-mint-soft text-daylight-mint' },
+  LOSS: { label: 'DERROTA',  cls: 'bg-daylight-red-soft text-daylight-red' },
+  DRAW: { label: 'EMPATE',   cls: 'bg-gray-100 text-daylight-ink-sub' },
+}
+
 export default function PlayedMatchesPage() {
   const [matches, setMatches] = useState([])
   const [loading, setLoading] = useState(true)
@@ -18,112 +24,142 @@ export default function PlayedMatchesPage() {
 
   if (loading) return (
     <div className="flex justify-center pt-20">
-      <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
+  const wins = matches.filter(m => m.matchResult?.outcome === 'WIN').length
+  const losses = matches.filter(m => m.matchResult?.outcome === 'LOSS').length
+
   return (
-    <div className="px-4 py-5">
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold text-gray-800">Partidos jugados</h1>
+    <div className="pb-24">
+      <div className="px-5 pt-1 pb-2 flex items-end justify-between">
+        <div>
+          <div className="eyebrow mb-1">JUGADOS · {matches.length}</div>
+          <h1
+            className="font-display font-extrabold text-daylight-ink"
+            style={{ fontSize: 32, lineHeight: 0.95, letterSpacing: '-1.1px' }}
+          >
+            Partidos<br />
+            <span className="text-daylight-pink">jugados.</span>
+          </h1>
+        </div>
         {session?.isAdmin && (
           <button
             onClick={() => navigate('/players/stats')}
-            className="flex items-center gap-1.5 text-sm font-medium text-padel-pink"
+            className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub underline"
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            Récord
+            Récord →
           </button>
         )}
       </div>
 
+      {matches.length > 0 && (
+        <div className="px-5 pt-3">
+          <div className="bg-daylight-ink text-white rounded-2xl px-4 py-3 flex items-center justify-around">
+            <div className="text-center">
+              <div className="font-display font-extrabold text-2xl tracking-[-0.5px] text-daylight-mint">{wins}</div>
+              <div className="font-mono text-[9px] tracking-[0.15em] uppercase opacity-70 mt-0.5">Ganados</div>
+            </div>
+            <div className="w-px h-8 bg-white/20" />
+            <div className="text-center">
+              <div className="font-display font-extrabold text-2xl tracking-[-0.5px] text-daylight-red">{losses}</div>
+              <div className="font-mono text-[9px] tracking-[0.15em] uppercase opacity-70 mt-0.5">Perdidos</div>
+            </div>
+            <div className="w-px h-8 bg-white/20" />
+            <div className="text-center">
+              <div className="font-display font-extrabold text-2xl tracking-[-0.5px]">{matches.length}</div>
+              <div className="font-mono text-[9px] tracking-[0.15em] uppercase opacity-70 mt-0.5">Totales</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {matches.length === 0 ? (
-        <div className="text-center pt-16 text-gray-400">
-          <svg className="w-16 h-16 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+        <div className="text-center pt-16 text-daylight-ink-sub">
+          <svg className="w-16 h-16 mx-auto mb-4 text-daylight-hair" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round"
               d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
           </svg>
-          <p className="font-medium">Sin partidos jugados aún</p>
+          <p className="font-display font-bold text-daylight-ink">Sin partidos jugados aún</p>
           <p className="text-sm mt-1">Aquí aparecerán los resultados</p>
         </div>
       ) : (
-        <div className="space-y-3">
-          {matches.map(m => <PlayedMatchCard key={m.id} match={m} onClick={() => navigate(`/matchdays/${m.id}`)} />)}
+        <div className="px-5 pt-4 flex flex-col gap-3">
+          {matches.map(m => (
+            <PlayedMatchCard key={m.id} match={m} onClick={() => navigate(`/matchdays/${m.id}`)} />
+          ))}
         </div>
       )}
     </div>
   )
 }
 
-const OUTCOME_BADGE = {
-  WIN:  { label: 'Victoria', cls: 'bg-green-100 text-green-700' },
-  LOSS: { label: 'Derrota',  cls: 'bg-red-100 text-red-600' },
-  DRAW: { label: 'Empate',   cls: 'bg-gray-100 text-gray-500' },
-}
-
 function PlayedMatchCard({ match, onClick }) {
   const { title, date, venue, competition, matchResult } = match
   const competitionData = useCompetition(competition)
-  const competitionLabel = competitionData?.name ?? (competition && !competition.includes('-') ? competition : null)
+  const competitionLabel = competitionData?.name
+    ?? (competition && !competition.includes('-') ? competition : null)
+  const competitionColor = competitionData?.color || '#FF2D72'
   const formattedDate = date
-    ? new Date(date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })
+    ? new Date(date).toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' })
     : null
 
   const outcome = matchResult?.outcome ? OUTCOME_BADGE[matchResult.outcome] : null
 
   return (
-    <div onClick={onClick} className="card cursor-pointer active:bg-gray-50">
-      <div className="flex items-start justify-between gap-2 mb-2">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="badge-played">Jugado</span>
+    <div onClick={onClick} className="card cursor-pointer active:bg-daylight-cream/40 transition-colors">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
             {outcome && (
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${outcome.cls}`}>
-                {outcome.label}
+              <span className={`badge ${outcome.cls}`}>{outcome.label}</span>
+            )}
+            {competitionLabel && (
+              <span className="font-mono text-[9px] font-medium tracking-[0.12em] uppercase text-daylight-ink-sub flex items-center gap-1.5">
+                <span
+                  className="inline-block w-[7px] h-[7px] rounded-sm shrink-0"
+                  style={{ backgroundColor: competitionColor }}
+                />
+                {competitionLabel}
               </span>
             )}
           </div>
-          <h2 className="font-bold text-gray-800 mt-1">{title || 'Partido'}</h2>
+          <h2 className="font-display font-bold text-[19px] leading-tight tracking-[-0.4px] text-daylight-ink truncate">
+            {title || 'Partido'}
+          </h2>
           {(formattedDate || venue) && (
-            <p className="text-sm text-gray-500 mt-0.5">
-              {[formattedDate, venue].filter(Boolean).join(' · ')}
-            </p>
-          )}
-          {competitionLabel && (
-            <p className="flex items-center gap-1 text-xs text-gray-400 mt-0.5">
-              {competitionData?.color && (
-                <span
-                  className="w-2.5 h-2.5 rounded-full inline-block"
-                  style={{ backgroundColor: competitionData.color }}
-                />
-              )}
-              {competitionLabel}
+            <p className="text-xs text-daylight-ink-sub mt-1.5 truncate">
+              {formattedDate && <span className="font-semibold text-daylight-ink">{formattedDate}</span>}
+              {venue && <> · {venue}</>}
             </p>
           )}
         </div>
-        <svg className="w-5 h-5 text-gray-300 shrink-0 mt-1" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+        <svg
+          className="w-5 h-5 text-daylight-ink-sub shrink-0 mt-1.5"
+          fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"
+        >
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
         </svg>
       </div>
 
-      {matchResult && (
-        <div className="mt-3 pt-3 border-t border-gray-50 space-y-1">
+      {matchResult && [matchResult.pair1, matchResult.pair2, matchResult.pair3].some(Boolean) && (
+        <div className="mt-3.5 pt-3.5 border-t border-dashed border-daylight-hair space-y-1.5">
           {[matchResult.pair1, matchResult.pair2, matchResult.pair3]
             .filter(Boolean)
             .map((pair, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
-                <span className="text-gray-400 w-16 text-xs">Pareja {i + 1}</span>
-                <span className="font-mono text-gray-700">
-                  {(pair.sets || []).map(s => `${s.gamesHome}–${s.gamesAway}`).join(' · ')}
+                <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-daylight-ink-sub w-16 shrink-0">
+                  Pareja {i + 1}
+                </span>
+                <span className="font-mono text-[13px] font-semibold text-daylight-ink">
+                  {(pair.sets || []).map(s => `${s.gamesHome}–${s.gamesAway}`).join('  ·  ') || '—'}
                 </span>
               </div>
             ))}
           {matchResult.finalPlayers?.length > 0 && (
-            <p className="text-xs text-gray-400 mt-1">
-              Jugaron: {matchResult.finalPlayers.join(', ')}
+            <p className="font-mono text-[10px] tracking-[0.08em] text-daylight-ink-sub mt-1">
+              Jugaron: <span className="text-daylight-ink font-semibold">{matchResult.finalPlayers.join(', ')}</span>
             </p>
           )}
         </div>

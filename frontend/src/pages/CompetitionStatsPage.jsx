@@ -17,16 +17,17 @@ export default function CompetitionStatsPage() {
 
   if (loading) return (
     <div className="flex justify-center pt-20">
-      <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   if (!data) return (
-    <div className="px-4 py-5 text-center text-gray-400">Competición no encontrada</div>
+    <div className="px-4 py-5 text-center text-daylight-ink-sub">Competición no encontrada</div>
   )
 
   const { competition, players, totalWins, totalLosses, totalDraws } = data
   const totalPlayed = totalWins + totalLosses + totalDraws
+  const competitionColor = competition.color || '#FF2D72'
 
   const sorted = [...players].sort((a, b) => {
     if (sortField === 'jugados') return b.jugados - a.jugados
@@ -37,118 +38,174 @@ export default function CompetitionStatsPage() {
   })
 
   return (
-    <div className="px-4 py-5">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-gray-400 mb-5">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver
-      </button>
-
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-4">
-        <span
-          className="w-5 h-5 rounded-full shrink-0"
-          style={{ backgroundColor: competition.color || '#9ca3af' }}
-        />
-        <h1 className="text-xl font-bold text-gray-800">{competition.name}</h1>
+    <div className="pb-24">
+      {/* Top bar */}
+      <div className="px-4 pt-1 pb-2 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center bg-daylight-surface border border-daylight-hair rounded-xl"
+          aria-label="Volver"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-daylight-ink">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub">
+          Estadísticas
+        </span>
+        <div className="w-9 h-9" />
       </div>
 
-      {/* Global record */}
-      <div className="card mb-5">
-        <p className="text-xs text-gray-400 font-medium mb-2">Récord global</p>
-        <div className="flex items-center gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-green-600">{totalWins}</p>
-            <p className="text-xs text-gray-400">Victorias</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-red-500">{totalLosses}</p>
-            <p className="text-xs text-gray-400">Derrotas</p>
-          </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-400">{totalDraws}</p>
-            <p className="text-xs text-gray-400">Empates</p>
-          </div>
-          <div className="text-center ml-auto">
-            <p className="text-2xl font-bold text-gray-700">{totalPlayed}</p>
-            <p className="text-xs text-gray-400">Partidos</p>
+      {/* Hero card */}
+      <div className="px-4 mt-1.5">
+        <div className="bg-daylight-ink text-white rounded-3xl p-5 relative overflow-hidden">
+          <div
+            className="absolute rounded-full"
+            style={{
+              right: -50, top: -50, width: 180, height: 180,
+              background: competitionColor, opacity: 0.85,
+            }}
+          />
+          <div className="relative">
+            <div className="flex items-center gap-2 mb-3">
+              <span
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ background: competitionColor }}
+              />
+              <span className="font-mono text-[10px] tracking-[0.15em] uppercase opacity-75">
+                Competición
+              </span>
+            </div>
+            <h1
+              className="font-display font-extrabold text-white"
+              style={{ fontSize: 30, lineHeight: 1, letterSpacing: '-1.1px' }}
+            >
+              {competition.name}
+            </h1>
+
+            <div className="flex gap-4 mt-5">
+              <HeroNum value={totalWins} label="VICTORIAS" color="#0EBE89" />
+              <HeroNum value={totalLosses} label="DERROTAS" color="#E2434B" />
+              {totalDraws > 0 && <HeroNum value={totalDraws} label="EMPATES" color="#9C9AA5" />}
+              <HeroNum value={totalPlayed} label="TOTALES" color="#FFFFFF" />
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Player stats table */}
+      {/* Player stats */}
       {players.length === 0 ? (
-        <div className="text-center pt-8 text-gray-400">
-          <p className="font-medium">Sin datos todavía</p>
-          <p className="text-sm mt-1">Los datos aparecerán cuando haya convocatorias en esta competición</p>
+        <div className="px-5 pt-10 text-center text-daylight-ink-sub">
+          <p className="font-display font-bold text-daylight-ink">Sin datos todavía</p>
+          <p className="text-sm mt-1">Los datos aparecerán con la primera convocatoria</p>
         </div>
       ) : (
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-semibold text-gray-600">Por jugador</p>
-            <select
-              value={sortField}
-              onChange={e => setSortField(e.target.value)}
-              className="text-xs border border-gray-200 rounded-lg px-2 py-1 text-gray-600"
-            >
-              <option value="jugados">Ordenar: jugados</option>
-              <option value="apuntados">Ordenar: apuntados</option>
-              <option value="ganados">Ordenar: ganados</option>
-              <option value="pctGanados">Ordenar: % ganados</option>
-            </select>
-          </div>
+        <>
+          <div className="px-5 pt-5">
+            <div className="flex items-center justify-between mb-3">
+              <div className="eyebrow">POR JUGADOR · {players.length}</div>
+              <select
+                value={sortField}
+                onChange={e => setSortField(e.target.value)}
+                className="input-field text-xs py-1.5 px-2 w-auto"
+              >
+                <option value="jugados">jugados</option>
+                <option value="apuntados">apuntados</option>
+                <option value="ganados">ganados</option>
+                <option value="pctGanados">% ganados</option>
+              </select>
+            </div>
 
-          <div className="overflow-x-auto -mx-4">
-            <table className="w-full text-sm min-w-[480px]">
-              <thead>
-                <tr className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
-                  <th className="text-left px-4 py-2">Jugador</th>
-                  <th className="text-center px-2 py-2">Apt.</th>
-                  <th className="text-center px-2 py-2">Jug.</th>
-                  <th className="text-center px-2 py-2 bg-indigo-50 text-indigo-600 font-bold">% Jug.</th>
-                  <th className="text-center px-2 py-2">Gan.</th>
-                  <th className="text-center px-2 py-2">Per.</th>
-                  <th className="text-center px-2 py-2">%Gan.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sorted.map((p, i) => (
-                  <tr key={p.playerId} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                    <td className="px-4 py-2.5 font-medium text-gray-800">{p.name}</td>
-                    <td className="text-center px-2 py-2.5 text-gray-400 text-xs">{p.apuntados}</td>
-                    <td className="text-center px-2 py-2.5 font-bold text-gray-700">{p.jugados}</td>
-                    <td className="px-2 py-2 bg-indigo-50">
-                      <div className="flex flex-col items-center gap-1">
-                        <span className={`text-sm font-bold ${p.pctJugados >= 75 ? 'text-indigo-700' : p.pctJugados >= 50 ? 'text-indigo-500' : 'text-gray-400'}`}>
-                          {p.pctJugados}%
-                        </span>
-                        <div className="w-full bg-indigo-100 rounded-full h-1.5 max-w-[48px]">
-                          <div
-                            className="bg-indigo-500 h-1.5 rounded-full transition-all"
-                            style={{ width: `${Math.min(p.pctJugados, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-                    </td>
-                    <td className="text-center px-2 py-2.5 text-green-600 font-semibold">{p.ganados}</td>
-                    <td className="text-center px-2 py-2.5 text-red-500">{p.perdidos}</td>
-                    <td className="text-center px-2 py-2.5 font-semibold">
-                      <span className={p.pctGanados >= 50 ? 'text-green-600' : 'text-red-500'}>
-                        {p.pctGanados}%
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+            <div className="flex flex-col gap-2.5">
+              {sorted.map(p => (
+                <PlayerStatCard key={p.playerId} p={p} />
+              ))}
+            </div>
 
-          <p className="text-xs text-gray-400 mt-3 px-1">
-            Apt. = apuntados · Jug. = jugados · Gan. = ganados · Per. = perdidos
-          </p>
-        </div>
+            <p className="font-mono text-[9px] tracking-[0.1em] uppercase text-daylight-ink-sub mt-3 px-1">
+              Apt. = apuntados · Jug. = jugados · Gan. = ganados · Per. = perdidos
+            </p>
+          </div>
+        </>
       )}
+    </div>
+  )
+}
+
+function HeroNum({ value, label, color }) {
+  return (
+    <div className="flex-1 min-w-0">
+      <div
+        className="font-display font-extrabold"
+        style={{ fontSize: 28, lineHeight: 1, letterSpacing: '-1px', color }}
+      >
+        {value}
+      </div>
+      <div className="font-mono text-[9px] tracking-[0.15em] uppercase opacity-70 mt-1 truncate">
+        {label}
+      </div>
+    </div>
+  )
+}
+
+function PlayerStatCard({ p }) {
+  const pctGanados = Math.min(Math.max(0, p.pctGanados || 0), 100)
+  const pctJugados = Math.min(Math.max(0, p.pctJugados || 0), 100)
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between mb-2.5">
+        <span className="font-display font-bold text-[15px] text-daylight-ink truncate tracking-[-0.2px]">
+          {p.name}
+        </span>
+        <div className="flex items-baseline gap-1 shrink-0">
+          <span className="font-display font-extrabold text-daylight-ink" style={{ fontSize: 18, letterSpacing: '-0.4px' }}>
+            {p.jugados}
+          </span>
+          <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-daylight-ink-sub">
+            JUG.
+          </span>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2 mb-2">
+        <Mini label="APT" value={p.apuntados} />
+        <Mini label="GAN" value={p.ganados} accent="mint" />
+        <Mini label="PER" value={p.perdidos} accent="red" />
+        <Mini label="%G" value={`${pctGanados}%`} accent={pctGanados >= 50 ? 'mint' : 'red'} />
+      </div>
+
+      <div className="flex items-center gap-2">
+        <span className="font-mono text-[9px] tracking-[0.12em] uppercase text-daylight-ink-sub w-16 shrink-0">
+          % Asist.
+        </span>
+        <div className="flex-1 bg-daylight-cream rounded-full h-1.5">
+          <div
+            className="bg-daylight-ink h-1.5 rounded-full transition-all"
+            style={{ width: `${pctJugados}%` }}
+          />
+        </div>
+        <span className="font-mono text-[10px] font-semibold text-daylight-ink w-9 text-right shrink-0">
+          {pctJugados}%
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function Mini({ label, value, accent }) {
+  const colorCls = accent === 'mint'
+    ? 'text-daylight-mint'
+    : accent === 'red'
+      ? 'text-daylight-red'
+      : 'text-daylight-ink'
+  return (
+    <div className="text-center">
+      <div className={`font-display font-extrabold ${colorCls}`} style={{ fontSize: 16, letterSpacing: '-0.3px' }}>
+        {value}
+      </div>
+      <div className="font-mono text-[8px] tracking-[0.15em] uppercase text-daylight-ink-sub mt-0.5">
+        {label}
+      </div>
     </div>
   )
 }

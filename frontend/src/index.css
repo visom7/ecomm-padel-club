@@ -4,33 +4,126 @@
 
 @layer base {
   body {
-    @apply bg-white text-gray-900 font-sans;
+    @apply bg-daylight-cream text-daylight-ink font-sans;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
 @layer components {
-  .btn-pink {
-    @apply bg-padel-pink text-white font-semibold px-4 py-2 rounded-xl 
-           active:bg-padel-pink-dark transition-colors;
-  }
-  .btn-outline {
-    @apply border-2 border-padel-pink text-padel-pink font-semibold px-4 py-2 rounded-xl 
-           active:bg-padel-pink-bg transition-colors;
-  }
+  /* ---------- Surfaces ---------- */
   .card {
-    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-4;
+    @apply bg-daylight-surface border border-daylight-hair rounded-2xl p-4;
   }
-  .badge-open {
-    @apply bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5 rounded-full;
+
+  /* ---------- Buttons ---------- */
+  /* Primary pink — heavy 3D feel */
+  .btn-pink {
+    @apply bg-daylight-pink text-white font-display font-bold text-base rounded-xl px-5 py-3.5;
+    letter-spacing: -0.3px;
+    box-shadow: 0 6px 0 #5C0E2E;
+    transition: transform 80ms, box-shadow 80ms;
   }
-  .badge-closed {
-    @apply bg-yellow-100 text-yellow-700 text-xs font-semibold px-2 py-0.5 rounded-full;
+  .btn-pink:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #5C0E2E;
   }
-  .badge-played {
-    @apply bg-gray-100 text-gray-600 text-xs font-semibold px-2 py-0.5 rounded-full;
+
+  /* Outline ghost */
+  .btn-ghost,
+  .btn-outline {
+    @apply bg-transparent text-daylight-ink border-2 border-daylight-ink
+           font-display font-bold text-base rounded-xl px-5 py-3.5;
+    letter-spacing: -0.2px;
   }
+
+  /* Big satisfying mint CTA — only on detail "PUEDO" */
+  .btn-mint-hero {
+    @apply bg-daylight-mint text-white font-display font-extrabold text-2xl rounded-[18px] px-5 py-5;
+    letter-spacing: -0.5px;
+    box-shadow: 0 6px 0 #086D4F;
+    transition: transform 80ms, box-shadow 80ms;
+  }
+  .btn-mint-hero:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #086D4F;
+  }
+
+  /* Small ink "Puedo" inside MatchdayCard */
+  .btn-ink-card {
+    @apply bg-daylight-ink text-daylight-cream font-display font-bold text-base rounded-xl py-3;
+    letter-spacing: -0.2px;
+    box-shadow: 0 4px 0 #000;
+    transition: transform 80ms, box-shadow 80ms;
+  }
+  .btn-ink-card:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #000;
+  }
+
+  /* Disabled state for all .btn-* */
+  .btn-pink:disabled,
+  .btn-ghost:disabled,
+  .btn-mint-hero:disabled,
+  .btn-ink-card:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  /* ---------- Status badges (mono, micro) ---------- */
+  .badge {
+    @apply font-mono text-[9px] font-bold tracking-[0.15em] uppercase rounded px-1.5 py-0.5;
+  }
+  .badge-open    { @apply bg-daylight-mint-soft text-daylight-mint; }
+  .badge-closed  { @apply bg-daylight-pink-soft text-daylight-pink; }
+  .badge-live    { @apply bg-daylight-red text-white animate-pulse; }
+  .badge-played  { @apply bg-gray-100 text-daylight-ink-sub; }
+
+  /* ---------- Filter chips ---------- */
+  .chip {
+    @apply font-sans text-xs font-semibold px-3 py-1.5 rounded-full
+           border-[1.5px] border-daylight-ink text-daylight-ink bg-transparent
+           cursor-pointer transition-colors;
+  }
+  .chip-selected { @apply bg-daylight-ink text-daylight-cream; }
+
+  /* ---------- Player chip ---------- */
+  .player-chip {
+    @apply inline-flex items-center gap-2 pl-1.5 pr-3 py-1.5 rounded-full
+           bg-daylight-surface text-daylight-ink border border-daylight-hair
+           text-sm font-semibold;
+  }
+  .player-chip-me   { @apply bg-daylight-ink text-white border-daylight-ink; }
+  .player-chip-out  { @apply bg-transparent text-daylight-ink-sub border-dashed
+                              line-through font-medium; }
+  .player-chip-pending { @apply bg-transparent text-daylight-ink-sub border-dashed
+                                font-medium; }
+
+  .player-chip-avatar {
+    @apply w-6 h-6 rounded-full flex items-center justify-center
+           font-mono text-[10px] font-bold bg-daylight-cream text-daylight-ink;
+  }
+  .player-chip-me .player-chip-avatar { @apply bg-daylight-pink text-white; }
+  .player-chip-out .player-chip-avatar { @apply bg-daylight-cream text-daylight-ink-sub; }
+
+  /* ---------- Eyebrow / section label ---------- */
+  .eyebrow {
+    @apply font-mono text-[10px] font-medium tracking-[0.15em] uppercase text-daylight-ink-sub;
+  }
+
+  /* ---------- Inputs (cream-tinted) ---------- */
   .input-field {
-    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm 
-           focus:outline-none focus:border-padel-pink transition-colors bg-gray-50;
+    @apply w-full bg-daylight-cream border border-daylight-hair rounded-xl px-4 py-3 text-sm
+           text-daylight-ink placeholder:text-daylight-ink-sub
+           focus:outline-none focus:border-daylight-pink transition-colors;
+  }
+}
+
+/* Focus-visible — keyboard accessibility */
+@layer utilities {
+  .focus-pink:focus-visible {
+    outline: 2px solid #FF2D72;
+    outline-offset: 2px;
   }
 }

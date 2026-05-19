@@ -3,6 +3,17 @@ import { useNavigate } from 'react-router-dom'
 import { getPlayers, verifyAdminPin } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { setAdminPin } from '../context/adminPin'
+import EcommLogo from '../components/EcommLogo'
+
+function initials(name) {
+  if (!name) return '··'
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(p => p[0].toUpperCase())
+    .join('')
+}
 
 export default function PlayerSelectPage() {
   const [players, setPlayers] = useState([])
@@ -50,8 +61,8 @@ export default function PlayerSelectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-padel-pink-bg">
-        <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="min-h-screen flex items-center justify-center bg-daylight-cream">
+        <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
       </div>
     )
   }
@@ -60,76 +71,116 @@ export default function PlayerSelectPage() {
   const regularPlayers = players.filter(p => p.role === 'PLAYER')
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Logo */}
-      <div className="pt-12 pb-8 px-6 flex flex-col items-center bg-gray-700 rounded-b-3xl">
-        <img src="/logo.png" alt="Ecomm Pädel Club" className="h-16 object-contain mb-6" />
-        <h1 className="text-xl font-bold text-white">¿Quién eres?</h1>
-        <p className="text-sm text-gray-300 mt-1">Selecciona tu nombre para continuar</p>
+    <div className="min-h-screen bg-daylight-cream flex flex-col">
+      {/* Hero */}
+      <div className="px-5 pt-10 pb-6 flex flex-col items-center text-center">
+        <EcommLogo height={72} />
+        <div className="eyebrow mt-5">DAYLIGHT · CLUB</div>
+        <h1
+          className="font-display font-extrabold text-daylight-ink mt-2"
+          style={{ fontSize: 36, lineHeight: 0.95, letterSpacing: '-1.2px' }}
+        >
+          ¿Quién <span className="text-daylight-pink">eres</span>?
+        </h1>
+        <p className="text-sm text-daylight-ink-sub mt-2 max-w-xs">
+          Selecciona tu nombre para apuntarte a la próxima.
+        </p>
       </div>
 
-      {/* Player list */}
-      <div className="flex-1 bg-white rounded-t-3xl px-5 pt-6 pb-8">
-        <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-3">Jugadores</p>
-        <div className="grid grid-cols-2 gap-3">
-          {regularPlayers.map(player => (
-            <button
-              key={player.id}
-              onClick={() => handleSelect(player)}
-              className="bg-gray-50 hover:bg-padel-pink-bg active:bg-padel-pink/10 border border-gray-200 
-                         rounded-2xl py-4 px-3 text-center font-semibold text-gray-700 transition-colors"
-            >
-              {player.name}
-            </button>
-          ))}
-        </div>
+      <div className="flex-1 px-5 pb-10">
+        {regularPlayers.length > 0 && (
+          <>
+            <div className="eyebrow mb-3">JUGADORES · {regularPlayers.length}</div>
+            <div className="grid grid-cols-2 gap-3">
+              {regularPlayers.map(player => (
+                <button
+                  key={player.id}
+                  onClick={() => handleSelect(player)}
+                  className="card flex items-center gap-2.5 text-left active:bg-daylight-cream transition-colors"
+                >
+                  <div className="w-9 h-9 rounded-full bg-daylight-cream text-daylight-ink font-display font-bold text-sm flex items-center justify-center shrink-0">
+                    {initials(player.name)}
+                  </div>
+                  <span className="font-display font-bold text-[15px] text-daylight-ink truncate">
+                    {player.name}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
 
-        <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold mb-3 mt-6">Administradores</p>
-        <div className="grid grid-cols-2 gap-3">
-          {admins.map(player => (
-            <button
-              key={player.id}
-              onClick={() => handleSelect(player)}
-              className="bg-padel-pink-bg hover:bg-padel-pink/20 active:bg-padel-pink/30 border border-padel-pink/30
-                         rounded-2xl py-4 px-3 text-center font-semibold text-padel-pink-dark transition-colors 
-                         flex flex-col items-center gap-1"
-            >
-              {player.name}
-              <span className="text-xs font-normal text-padel-pink">Admin</span>
-            </button>
-          ))}
-        </div>
+        {admins.length > 0 && (
+          <>
+            <div className="eyebrow mb-3 mt-6">ADMINISTRADORES · {admins.length}</div>
+            <div className="grid grid-cols-2 gap-3">
+              {admins.map(player => (
+                <button
+                  key={player.id}
+                  onClick={() => handleSelect(player)}
+                  className="bg-daylight-ink text-white rounded-2xl p-4 flex items-center gap-2.5 text-left active:opacity-90 transition-opacity"
+                >
+                  <div className="w-9 h-9 rounded-full bg-daylight-pink text-white font-display font-bold text-sm flex items-center justify-center shrink-0">
+                    {initials(player.name)}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="font-display font-bold text-[15px] truncate">{player.name}</div>
+                    <div className="font-mono text-[9px] tracking-[0.15em] uppercase text-daylight-amber mt-0.5">
+                      Admin
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* PIN Modal */}
+      {/* PIN bottom sheet */}
       {pinModal && (
         <div className="fixed inset-0 bg-black/50 flex items-end z-50" onClick={() => setPinModal(null)}>
           <div
-            className="bg-white w-full rounded-t-3xl p-6 pb-10"
+            className="bg-daylight-surface w-full rounded-t-3xl p-6 pb-10 max-w-lg mx-auto"
             onClick={e => e.stopPropagation()}
           >
-            <h2 className="text-lg font-bold text-gray-800 mb-1">
-              Hola, {pinModal.name} 👋
+            <div className="w-10 h-1 rounded-full bg-daylight-hair mx-auto mb-5" />
+
+            <div className="eyebrow mb-2">ACCESO ADMIN</div>
+            <h2
+              className="font-display font-extrabold text-daylight-ink"
+              style={{ fontSize: 26, lineHeight: 1, letterSpacing: '-0.8px' }}
+            >
+              Hola, <span className="text-daylight-pink">{pinModal.name}</span>
             </h2>
-            <p className="text-sm text-gray-500 mb-5">Introduce el PIN de administrador</p>
-            <form onSubmit={handlePinSubmit} className="space-y-4">
+            <p className="text-sm text-daylight-ink-sub mt-2 mb-5">
+              Introduce el PIN para entrar como administrador.
+            </p>
+            <form onSubmit={handlePinSubmit} className="space-y-3">
               <input
                 type="password"
                 inputMode="numeric"
                 value={pin}
                 onChange={e => setPin(e.target.value)}
-                placeholder="PIN"
+                placeholder="• • • •"
                 autoFocus
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-center text-2xl 
-                           tracking-widest focus:outline-none focus:border-padel-pink"
+                className="input-field text-center font-mono text-2xl tracking-[0.4em]"
               />
-              {pinError && <p className="text-red-500 text-sm text-center">{pinError}</p>}
+              {pinError && (
+                <p className="text-daylight-red text-sm text-center font-semibold">{pinError}</p>
+              )}
               <button
                 type="submit"
                 disabled={pinLoading || !pin}
-                className="btn-pink w-full py-3 disabled:opacity-50"
+                className="btn-pink w-full"
               >
                 {pinLoading ? 'Verificando…' : 'Entrar como admin'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPinModal(null)}
+                className="w-full font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub underline pt-1"
+              >
+                Cancelar
               </button>
             </form>
           </div>
