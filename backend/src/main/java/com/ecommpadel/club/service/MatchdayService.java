@@ -138,6 +138,17 @@ public class MatchdayService {
         return matchdayRepository.save(matchday);
     }
 
+    public Matchday reopen(String id) {
+        Matchday matchday = findById(id);
+        if (matchday.getStatus() != Matchday.Status.CLOSED) {
+            throw new IllegalStateException(
+                    "Matchday must be CLOSED to reopen, was: " + matchday.getStatus());
+        }
+        matchday.setStatus(Matchday.Status.OPEN);
+        log.info("Matchday reopened: id={}", id);
+        return matchdayRepository.save(matchday);
+    }
+
     public Matchday goLive(String id, ResultRequest request) {
         Matchday matchday = findById(id);
 

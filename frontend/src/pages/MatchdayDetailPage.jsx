@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { getMatchday, getPlayers, respondToMatchday, closeMatchday, deleteMatchday, handleAdminError } from '../services/api'
+import { getMatchday, getPlayers, respondToMatchday, closeMatchday, reopenMatchday, deleteMatchday, handleAdminError } from '../services/api'
 import { useSession } from '../context/SessionContext'
 import { useCompetition } from '../context/CompetitionsContext'
 import { getAdminPin } from '../context/adminPin'
@@ -94,6 +94,16 @@ export default function MatchdayDetailPage() {
     }
   }
 
+  const handleReopen = async () => {
+    if (!confirm('¿Reabrir esta convocatoria? Los jugadores podrán volver a apuntarse.')) return
+    try {
+      const updated = await reopenMatchday(id, getAdminPin())
+      setMatchday(updated)
+    } catch (err) {
+      handleAdminError(err, navigate)
+    }
+  }
+
   const handleDelete = async () => {
     if (!confirm('¿Eliminar esta convocatoria?')) return
     try {
@@ -177,6 +187,11 @@ export default function MatchdayDetailPage() {
                   {isClosed && (
                     <AdminAction onClick={() => { setMenuOpen(false); navigate(`/live/${id}`) }}>
                       ▶ Empezar directo
+                    </AdminAction>
+                  )}
+                  {isClosed && (
+                    <AdminAction onClick={() => { setMenuOpen(false); handleReopen() }}>
+                      🔓 Reabrir convocatoria
                     </AdminAction>
                   )}
                   {isLive && (

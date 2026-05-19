@@ -150,6 +150,53 @@ class MatchdayServiceTest {
     }
 
     @Test
+    void reopen_setsStatusBackToOpen() {
+        Matchday closed = new Matchday();
+        closed.setId("matchday-1");
+        closed.setStatus(Matchday.Status.CLOSED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(closed));
+        when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Matchday result = matchdayService.reopen("matchday-1");
+
+        assertThat(result.getStatus()).isEqualTo(Matchday.Status.OPEN);
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsOpen() {
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(openMatchday));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("CLOSED");
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsLive() {
+        Matchday live = new Matchday();
+        live.setId("matchday-1");
+        live.setStatus(Matchday.Status.LIVE);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(live));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
+    void reopen_rejectsWhenStatusIsPlayed() {
+        Matchday played = new Matchday();
+        played.setId("matchday-1");
+        played.setStatus(Matchday.Status.PLAYED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(played));
+
+        assertThatThrownBy(() -> matchdayService.reopen("matchday-1"))
+                .isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void findActive_returnsOpenClosedAndLiveMatchdays() {
         Matchday closed = new Matchday();
         closed.setStatus(Matchday.Status.CLOSED);

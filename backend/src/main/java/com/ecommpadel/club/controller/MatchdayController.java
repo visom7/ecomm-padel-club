@@ -117,6 +117,20 @@ public class MatchdayController {
         }
     }
 
+    @PostMapping("/{id}/reopen")
+    public ResponseEntity<Matchday> reopen(
+            @RequestHeader(HEADER_PIN) String pin,
+            @PathVariable String id) {
+        requireAdmin(pin);
+        try {
+            return ResponseEntity.ok(matchdayService.reopen(id));
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
+        }
+    }
+
     @PostMapping("/{id}/live")
     public ResponseEntity<Matchday> live(
             @RequestHeader(HEADER_PIN) String pin,

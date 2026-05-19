@@ -57,6 +57,9 @@ export const submitLiveSnapshot = (id, data, pin) =>
 export const closeMatchday = (id, pin) =>
   request(`/matchdays/${id}/close`, { method: 'POST', headers: { 'X-Admin-Pin': pin } })
 
+export const reopenMatchday = (id, pin) =>
+  request(`/matchdays/${id}/reopen`, { method: 'POST', headers: { 'X-Admin-Pin': pin } })
+
 export const verifyAdminPin = async (pin) => {
   try {
     await request('/admin/verify-pin', { method: 'POST', body: JSON.stringify({ pin }) })
