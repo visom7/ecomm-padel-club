@@ -7,6 +7,8 @@ import MatchdayDetailPage from './pages/MatchdayDetailPage'
 import MatchdayFormPage from './pages/MatchdayFormPage'
 import PlayedMatchesPage from './pages/PlayedMatchesPage'
 import ResultFormPage from './pages/ResultFormPage'
+import LiveListPage from './pages/LiveListPage'
+import LiveScorePage from './pages/LiveScorePage'
 import AdminPage from './pages/AdminPage'
 import CompetitionFormPage from './pages/CompetitionFormPage'
 import CompetitionStatsPage from './pages/CompetitionStatsPage'
@@ -27,6 +29,8 @@ export default function App() {
               <Route path="/matchdays/:id" element={<MatchdayDetailPage />} />
               <Route path="/matchdays/:id/edit" element={<MatchdayFormPage />} />
               <Route path="/matchdays/:id/result" element={<ResultFormPage />} />
+              <Route path="/live" element={<LiveListPage />} />
+              <Route path="/live/:id" element={<LiveScorePage />} />
               <Route path="/played" element={<PlayedMatchesPage />} />
               <Route path="/admin" element={<AdminPage />} />
               <Route path="/admin/competitions/new" element={<CompetitionFormPage />} />

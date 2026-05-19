@@ -51,6 +51,9 @@ export const respondToMatchday = (id, data) =>
 export const submitResult = (id, data, pin) =>
   request(`/matchdays/${id}/result`, { method: 'POST', body: JSON.stringify(data), headers: { 'X-Admin-Pin': pin } })
 
+export const submitLiveSnapshot = (id, data, pin) =>
+  request(`/matchdays/${id}/live`, { method: 'POST', body: JSON.stringify(data), headers: { 'X-Admin-Pin': pin } })
+
 export const closeMatchday = (id, pin) =>
   request(`/matchdays/${id}/close`, { method: 'POST', headers: { 'X-Admin-Pin': pin } })
 
