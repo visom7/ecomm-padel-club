@@ -86,7 +86,7 @@ export default function AdminPage() {
 
   if (loading) return (
     <div className="flex justify-center pt-20">
-      <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
@@ -94,44 +94,77 @@ export default function AdminPage() {
   const closedCompetitions = competitions.filter(c => c.active === false)
 
   return (
-    <div className="px-4 py-5 space-y-6">
+    <div className="pb-24">
+      {/* Hero */}
+      <div className="px-5 pt-1 pb-2">
+        <div className="eyebrow mb-1">PANEL · ADMIN</div>
+        <h1
+          className="font-display font-extrabold text-daylight-ink"
+          style={{ fontSize: 32, lineHeight: 0.95, letterSpacing: '-1.1px' }}
+        >
+          Administración<br />
+          <span className="text-daylight-pink">del club.</span>
+        </h1>
+      </div>
 
       {/* Competitions section */}
-      <div>
+      <div className="px-5 pt-5">
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-lg font-bold text-gray-800">Competiciones</h2>
+          <div className="font-display font-bold text-daylight-ink" style={{ fontSize: 18, letterSpacing: '-0.3px' }}>
+            Competiciones
+          </div>
           <button
             onClick={() => navigate('/admin/competitions/new')}
-            className="btn-pink px-4 py-2 text-sm"
+            className="btn-pink text-sm py-2.5 px-4"
           >
             + Nueva
           </button>
         </div>
 
         {competitions.length === 0 ? (
-          <div className="text-center pt-8 text-gray-400">
-            <svg className="w-16 h-16 mx-auto mb-4 text-gray-200" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round"
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="font-medium">Sin competiciones</p>
+          <div className="card text-center py-8 text-daylight-ink-sub">
+            <p className="font-display font-bold text-daylight-ink">Sin competiciones</p>
             <p className="text-sm mt-1">Crea la primera competición</p>
           </div>
         ) : (
-          <div className="space-y-5">
+          <div className="flex flex-col gap-4">
             {openCompetitions.length > 0 && (
               <div>
-                <p className="text-xs text-green-600 font-semibold uppercase tracking-widest mb-2">✅ Abiertas</p>
-                <div className="space-y-3">
-                  {openCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} onToggleActive={() => handleToggleActive(c)} toggling={togglingId === c.id} />)}
+                <div className="eyebrow mb-2 text-daylight-mint">● ABIERTAS · {openCompetitions.length}</div>
+                <div className="flex flex-col gap-2.5">
+                  {openCompetitions.map(c => (
+                    <CompetitionCard
+                      key={c.id}
+                      c={c}
+                      rec={records[c.id]}
+                      onStats={() => navigate(`/admin/competitions/${c.id}/stats`)}
+                      onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)}
+                      onDelete={() => handleDelete(c.id, c.name)}
+                      deleting={deletingId === c.id}
+                      onToggleActive={() => handleToggleActive(c)}
+                      toggling={togglingId === c.id}
+                    />
+                  ))}
                 </div>
               </div>
             )}
             {closedCompetitions.length > 0 && (
               <div>
-                <p className="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-2">🔒 Cerradas</p>
-                <div className="space-y-3">
-                  {closedCompetitions.map(c => <CompetitionCard key={c.id} c={c} rec={records[c.id]} onStats={() => navigate(`/admin/competitions/${c.id}/stats`)} onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)} onDelete={() => handleDelete(c.id, c.name)} deleting={deletingId === c.id} onToggleActive={() => handleToggleActive(c)} toggling={togglingId === c.id} />)}
+                <div className="eyebrow mb-2">● CERRADAS · {closedCompetitions.length}</div>
+                <div className="flex flex-col gap-2.5">
+                  {closedCompetitions.map(c => (
+                    <CompetitionCard
+                      key={c.id}
+                      c={c}
+                      rec={records[c.id]}
+                      onStats={() => navigate(`/admin/competitions/${c.id}/stats`)}
+                      onEdit={() => navigate(`/admin/competitions/${c.id}/edit`)}
+                      onDelete={() => handleDelete(c.id, c.name)}
+                      deleting={deletingId === c.id}
+                      onToggleActive={() => handleToggleActive(c)}
+                      toggling={togglingId === c.id}
+                    />
+                  ))}
                 </div>
               </div>
             )}
@@ -140,35 +173,44 @@ export default function AdminPage() {
       </div>
 
       {/* Beer rounds section */}
-      <div>
+      <div className="px-5 pt-7">
         <div className="flex items-center gap-2 mb-3">
-          <h2 className="text-lg font-bold text-gray-800">🍺 Cubos pendientes</h2>
+          <div className="font-display font-bold text-daylight-ink" style={{ fontSize: 18, letterSpacing: '-0.3px' }}>
+            🍺 Cubos pendientes
+          </div>
           {beerRounds.length > 0 && (
-            <span className="bg-amber-400 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-daylight-amber text-daylight-ink font-mono text-[10px] font-bold tracking-[0.1em] px-2 py-0.5 rounded-full">
               {beerRounds.length}
             </span>
           )}
         </div>
 
         {beerRounds.length === 0 ? (
-          <div className="card text-center py-6 text-gray-400">
-            <p className="text-2xl mb-1">🍺</p>
-            <p className="font-medium text-sm">Sin cubos pendientes</p>
+          <div className="card text-center py-6 text-daylight-ink-sub">
+            <p className="text-2xl mb-1">🍻</p>
+            <p className="font-display font-bold text-daylight-ink text-sm">Sin cubos pendientes</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="flex flex-col gap-2">
             {beerRounds.map(b => (
-              <div key={b.id} className="card flex items-center gap-3">
+              <div key={b.id} className="card flex items-center gap-3 py-3">
+                <div className="w-9 h-9 rounded-lg bg-daylight-pink-soft text-daylight-pink flex items-center justify-center shrink-0 text-base">
+                  🍺
+                </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-800 text-sm">{b.playerName}</p>
-                  <p className="text-xs text-gray-400 truncate">{b.matchdayTitle}</p>
+                  <p className="font-display font-bold text-[14px] text-daylight-ink truncate tracking-[-0.2px]">
+                    {b.playerName}
+                  </p>
+                  <p className="font-mono text-[10px] tracking-[0.08em] text-daylight-ink-sub truncate">
+                    {b.matchdayTitle}
+                  </p>
                 </div>
                 <button
                   onClick={() => handleMarkPaid(b.id)}
                   disabled={payingId === b.id}
-                  className="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-700 active:bg-amber-200 disabled:opacity-40 transition-colors"
+                  className="shrink-0 font-mono text-[10px] font-bold tracking-[0.1em] uppercase px-3 py-1.5 rounded-lg bg-daylight-mint-soft text-daylight-mint disabled:opacity-40 transition-colors active:bg-daylight-mint active:text-white"
                 >
-                  {payingId === b.id ? '…' : '✅ Pagado'}
+                  {payingId === b.id ? '…' : '✓ Pagado'}
                 </button>
               </div>
             ))}
@@ -179,28 +221,28 @@ export default function AdminPage() {
           <div className="mt-3">
             <button
               onClick={() => setShowBeerStats(v => !v)}
-              className="text-xs text-amber-600 font-semibold flex items-center gap-1"
+              className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub underline"
             >
-              {showBeerStats ? '▲' : '▼'} Historial por jugador
+              {showBeerStats ? '▲ Ocultar' : '▼ Historial'} por jugador
             </button>
             {showBeerStats && (
-              <div className="mt-2 card overflow-x-auto">
+              <div className="mt-2 card overflow-x-auto p-0">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-xs text-gray-400 uppercase tracking-wide border-b border-gray-100">
-                      <th className="text-left py-2 pr-3">Jugador</th>
+                    <tr className="font-mono text-[9px] font-bold tracking-[0.15em] uppercase text-daylight-ink-sub border-b border-daylight-hair">
+                      <th className="text-left py-2 px-3">Jugador</th>
                       <th className="text-center py-2 px-2">Total</th>
-                      <th className="text-center py-2 px-2 text-green-600">Pagados</th>
-                      <th className="text-center py-2 px-2 text-amber-600">Pendientes</th>
+                      <th className="text-center py-2 px-2 text-daylight-mint">Pag.</th>
+                      <th className="text-center py-2 px-2 text-daylight-pink">Pend.</th>
                     </tr>
                   </thead>
                   <tbody>
                     {beerStats.map((s, i) => (
-                      <tr key={s.playerId} className={i % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                        <td className="py-2 pr-3 font-medium text-gray-800">{s.playerName}</td>
-                        <td className="text-center py-2 px-2 text-gray-500">{s.total}</td>
-                        <td className="text-center py-2 px-2 font-semibold text-green-600">{s.paid}</td>
-                        <td className="text-center py-2 px-2 font-bold text-amber-600">{s.pending}</td>
+                      <tr key={s.playerId} className={i % 2 === 0 ? 'bg-daylight-surface' : 'bg-daylight-cream/50'}>
+                        <td className="py-2 px-3 font-semibold text-daylight-ink">{s.playerName}</td>
+                        <td className="text-center py-2 px-2 text-daylight-ink-sub">{s.total}</td>
+                        <td className="text-center py-2 px-2 font-display font-bold text-daylight-mint">{s.paid}</td>
+                        <td className="text-center py-2 px-2 font-display font-bold text-daylight-pink">{s.pending}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -217,38 +259,62 @@ export default function AdminPage() {
 function CompetitionCard({ c, rec, onStats, onEdit, onDelete, deleting, onToggleActive, toggling }) {
   const totalPlayed = rec ? rec.totalWins + rec.totalLosses + rec.totalDraws : 0
   const isOpen = c.active !== false
+  const color = c.color || '#FF2D72'
   return (
     <div className="card">
       <div className="flex items-center gap-3 mb-2">
-        <span className="w-4 h-4 rounded-full shrink-0" style={{ backgroundColor: c.color || '#9ca3af' }} />
-        <span className="font-semibold text-gray-800 flex-1">{c.name}</span>
+        <span className="w-3 h-3 rounded-sm shrink-0" style={{ backgroundColor: color }} />
+        <span className="font-display font-bold text-daylight-ink flex-1 tracking-[-0.2px]" style={{ fontSize: 16 }}>
+          {c.name}
+        </span>
       </div>
-      {rec !== undefined && (
-        <div className="flex items-center gap-3 mb-3 pl-7">
-          <span className="text-sm font-bold text-green-600">{rec.totalWins}V</span>
-          <span className="text-sm font-bold text-red-500">{rec.totalLosses}D</span>
-          {rec.totalDraws > 0 && <span className="text-sm font-bold text-gray-400">{rec.totalDraws}E</span>}
-          <span className="text-xs text-gray-400">· {totalPlayed} partido{totalPlayed !== 1 ? 's' : ''}</span>
+      {rec !== undefined && totalPlayed > 0 && (
+        <div className="flex items-center gap-3 mb-3 pl-6">
+          <span className="font-display font-extrabold text-daylight-mint" style={{ fontSize: 16, letterSpacing: '-0.3px' }}>
+            {rec.totalWins}V
+          </span>
+          <span className="font-display font-extrabold text-daylight-red" style={{ fontSize: 16, letterSpacing: '-0.3px' }}>
+            {rec.totalLosses}D
+          </span>
+          {rec.totalDraws > 0 && (
+            <span className="font-display font-extrabold text-daylight-ink-sub" style={{ fontSize: 16, letterSpacing: '-0.3px' }}>
+              {rec.totalDraws}E
+            </span>
+          )}
+          <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-daylight-ink-sub">
+            · {totalPlayed} jug.
+          </span>
         </div>
       )}
-      <div className="flex items-center gap-2">
-        <button onClick={onStats} className="flex-1 text-center text-xs font-medium text-blue-600 bg-blue-50 rounded-lg py-2 active:bg-blue-100">Estadísticas</button>
-        <button onClick={onEdit} className="flex-1 text-center text-xs font-medium text-gray-600 bg-gray-100 rounded-lg py-2 active:bg-gray-200">Editar</button>
-        <button
-          onClick={onToggleActive}
-          disabled={toggling}
-          className={`flex-1 text-center text-xs font-medium rounded-lg py-2 disabled:opacity-40 transition-colors ${
-            isOpen
-              ? 'text-orange-600 bg-orange-50 active:bg-orange-100'
-              : 'text-green-600 bg-green-50 active:bg-green-100'
-          }`}
-        >
-          {toggling ? '…' : isOpen ? '🔒 Cerrar' : '🔓 Reabrir'}
-        </button>
-        <button onClick={onDelete} disabled={deleting} className="flex-1 text-center text-xs font-medium text-red-600 bg-red-50 rounded-lg py-2 active:bg-red-100 disabled:opacity-40">
-          {deleting ? '…' : 'Eliminar'}
-        </button>
+      <div className="grid grid-cols-4 gap-2">
+        <ActionButton onClick={onStats} tone="ink">Stats</ActionButton>
+        <ActionButton onClick={onEdit} tone="cream">Editar</ActionButton>
+        <ActionButton onClick={onToggleActive} disabled={toggling} tone={isOpen ? 'amber' : 'mint'}>
+          {toggling ? '…' : isOpen ? '🔒 Cerrar' : '🔓 Abrir'}
+        </ActionButton>
+        <ActionButton onClick={onDelete} disabled={deleting} tone="red">
+          {deleting ? '…' : 'Borrar'}
+        </ActionButton>
       </div>
     </div>
+  )
+}
+
+function ActionButton({ onClick, disabled, tone, children }) {
+  const toneCls = {
+    ink:   'bg-daylight-ink text-white',
+    cream: 'bg-daylight-cream text-daylight-ink border border-daylight-hair',
+    amber: 'bg-daylight-amber text-daylight-ink',
+    mint:  'bg-daylight-mint-soft text-daylight-mint',
+    red:   'bg-daylight-red-soft text-daylight-red',
+  }[tone]
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className={`font-mono text-[10px] font-bold tracking-[0.08em] uppercase rounded-lg py-2 disabled:opacity-40 transition-opacity active:opacity-80 ${toneCls}`}
+    >
+      {children}
+    </button>
   )
 }

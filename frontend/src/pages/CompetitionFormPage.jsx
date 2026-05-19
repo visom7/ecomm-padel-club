@@ -4,9 +4,14 @@ import { getCompetitions, createCompetition, updateCompetition, handleAdminError
 import { getAdminPin } from '../context/adminPin'
 
 const PRESET_COLORS = [
-  '#ef4444', '#f97316', '#eab308', '#22c55e',
-  '#3b82f6', '#8b5cf6', '#ec4899', '#14b8a6',
-  '#64748b', '#000000',
+  '#FF2D72', // daylight pink
+  '#0EBE89', // mint
+  '#F4B400', // amber
+  '#E2434B', // red
+  '#16131A', // ink
+  '#8B5CF6', // purple accent
+  '#0EA5E9', // sky accent
+  '#A16207', // bronze
 ]
 
 export default function CompetitionFormPage() {
@@ -14,7 +19,7 @@ export default function CompetitionFormPage() {
   const navigate = useNavigate()
   const isEditing = Boolean(id)
 
-  const [form, setForm] = useState({ name: '', color: '#3b82f6', active: true })
+  const [form, setForm] = useState({ name: '', color: '#FF2D72', active: true })
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
@@ -24,7 +29,7 @@ export default function CompetitionFormPage() {
     getCompetitions().then(list => {
       const comp = list.find(c => c.id === id)
       if (comp) {
-        setForm({ name: comp.name || '', color: comp.color || '#3b82f6', active: comp.active !== false })
+        setForm({ name: comp.name || '', color: comp.color || '#FF2D72', active: comp.active !== false })
       }
       setLoading(false)
     })
@@ -56,27 +61,44 @@ export default function CompetitionFormPage() {
 
   if (loading) return (
     <div className="flex justify-center pt-20">
-      <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   return (
-    <div className="px-4 py-5">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-gray-400 mb-5">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver
-      </button>
+    <div className="pb-24">
+      {/* Top bar */}
+      <div className="px-4 pt-1 pb-2 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center bg-daylight-surface border border-daylight-hair rounded-xl"
+          aria-label="Volver"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-daylight-ink">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub">
+          {isEditing ? 'Editar' : 'Nueva'}
+        </span>
+        <div className="w-9 h-9" />
+      </div>
 
-      <h1 className="text-xl font-bold text-gray-800 mb-5">
-        {isEditing ? 'Editar competición' : 'Nueva competición'}
-      </h1>
+      <div className="px-5 pt-2 pb-1">
+        <div className="eyebrow mb-1">COMPETICIÓN</div>
+        <h1
+          className="font-display font-extrabold text-daylight-ink"
+          style={{ fontSize: 30, lineHeight: 0.95, letterSpacing: '-1.1px' }}
+        >
+          {isEditing ? <>Editar<br /><span className="text-daylight-pink">competición.</span></> : <>Nueva<br /><span className="text-daylight-pink">competición.</span></>}
+        </h1>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="px-5 pt-5 flex flex-col gap-5">
+        {/* Name */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-1">
-            Nombre <span className="text-red-400">*</span>
+          <label className="block font-mono text-[10px] font-medium tracking-[0.15em] uppercase text-daylight-ink-sub mb-1.5">
+            Nombre <span className="text-daylight-pink ml-1">*</span>
           </label>
           <input
             type="text"
@@ -87,59 +109,68 @@ export default function CompetitionFormPage() {
           />
         </div>
 
+        {/* Live preview card */}
+        <div className="card flex items-center gap-3">
+          <span className="w-4 h-4 rounded-sm shrink-0" style={{ backgroundColor: form.color }} />
+          <span className="font-display font-bold text-daylight-ink flex-1 tracking-[-0.2px] truncate" style={{ fontSize: 16 }}>
+            {form.name || 'Nombre de la competición'}
+          </span>
+          <span className={`badge ${form.active ? 'badge-open' : 'badge-closed'}`}>
+            {form.active ? '● ABIERTA' : '● CERRADA'}
+          </span>
+        </div>
+
+        {/* Color picker */}
         <div>
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Color</label>
-
-          {/* Preview */}
-          <div className="flex items-center gap-3 mb-4">
-            <span
-              className="w-10 h-10 rounded-full border-4 border-white shadow-md"
-              style={{ backgroundColor: form.color }}
-            />
-            <span className="text-sm font-medium text-gray-700">{form.name || 'Nombre de la competición'}</span>
+          <label className="block font-mono text-[10px] font-medium tracking-[0.15em] uppercase text-daylight-ink-sub mb-2.5">
+            Color
+          </label>
+          <div className="flex flex-wrap gap-2.5 mb-3">
+            {PRESET_COLORS.map(c => {
+              const selected = form.color === c
+              return (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => setForm(f => ({ ...f, color: c }))}
+                  className="w-9 h-9 rounded-lg transition-transform active:scale-95"
+                  style={{
+                    backgroundColor: c,
+                    boxShadow: selected
+                      ? '0 0 0 2px #F6F1EA, 0 0 0 4px #16131A'
+                      : '0 0 0 1px rgba(0,0,0,0.06)',
+                  }}
+                  aria-label={`Color ${c}`}
+                />
+              )
+            })}
           </div>
-
-          {/* Preset colors */}
-          <div className="flex flex-wrap gap-3 mb-3">
-            {PRESET_COLORS.map(c => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => setForm(f => ({ ...f, color: c }))}
-                className="w-8 h-8 rounded-full border-2 transition-transform active:scale-95"
-                style={{
-                  backgroundColor: c,
-                  borderColor: form.color === c ? '#1f2937' : 'transparent',
-                  transform: form.color === c ? 'scale(1.15)' : undefined,
-                }}
-              />
-            ))}
-          </div>
-
-          {/* Custom color input */}
           <div className="flex items-center gap-2">
             <input
               type="color"
               value={form.color}
               onChange={e => setForm(f => ({ ...f, color: e.target.value }))}
-              className="w-10 h-10 rounded cursor-pointer border border-gray-200"
+              className="w-10 h-10 rounded-lg cursor-pointer border border-daylight-hair bg-daylight-surface p-0.5"
             />
-            <span className="text-sm text-gray-500">Color personalizado</span>
+            <span className="font-mono text-[10px] tracking-[0.1em] uppercase text-daylight-ink-sub">
+              Personalizado · {form.color.toUpperCase()}
+            </span>
           </div>
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-
-        {/* Active/closed toggle */}
-        <div className="flex items-center justify-between py-3 border-t border-gray-100">
+        {/* Active toggle */}
+        <div className="flex items-center justify-between py-3 border-t border-daylight-hair">
           <div>
-            <p className="text-sm font-semibold text-gray-700">Estado</p>
-            <p className="text-xs text-gray-400">{form.active ? 'La competición está activa' : 'La competición está cerrada'}</p>
+            <div className="font-display font-bold text-daylight-ink" style={{ fontSize: 15 }}>Estado</div>
+            <div className="font-mono text-[10px] tracking-[0.1em] text-daylight-ink-sub mt-0.5">
+              {form.active ? 'LA COMPETICIÓN ESTÁ ACTIVA' : 'LA COMPETICIÓN ESTÁ CERRADA'}
+            </div>
           </div>
           <button
             type="button"
             onClick={() => setForm(f => ({ ...f, active: !f.active }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${form.active ? 'bg-green-500' : 'bg-gray-300'}`}
+            className={`relative w-12 h-6 rounded-full transition-colors ${form.active ? 'bg-daylight-mint' : 'bg-daylight-hair'}`}
+            aria-label={form.active ? 'Cerrar competición' : 'Reabrir competición'}
           >
             <span
               className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-6' : 'translate-x-0.5'}`}
@@ -147,7 +178,11 @@ export default function CompetitionFormPage() {
           </button>
         </div>
 
-        <button type="submit" disabled={saving} className="btn-pink w-full py-3 disabled:opacity-50">
+        {error && (
+          <p className="text-daylight-red text-sm font-semibold">{error}</p>
+        )}
+
+        <button type="submit" disabled={saving} className="btn-pink w-full">
           {saving ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear competición'}
         </button>
       </form>

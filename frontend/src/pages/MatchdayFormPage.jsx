@@ -68,46 +68,72 @@ export default function MatchdayFormPage() {
 
   if (loading) return (
     <div className="flex justify-center pt-20">
-      <div className="w-8 h-8 border-4 border-padel-pink border-t-transparent rounded-full animate-spin" />
+      <div className="w-8 h-8 border-4 border-daylight-pink border-t-transparent rounded-full animate-spin" />
     </div>
   )
 
   return (
-    <div className="px-4 py-5">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-1 text-sm text-gray-400 mb-5">
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-        </svg>
-        Volver
-      </button>
+    <div className="pb-24">
+      {/* Top bar */}
+      <div className="px-4 pt-1 pb-2 flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="w-9 h-9 flex items-center justify-center bg-daylight-surface border border-daylight-hair rounded-xl"
+          aria-label="Volver"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className="text-daylight-ink">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </button>
+        <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-daylight-ink-sub">
+          {isEditing ? 'Editar' : 'Nueva'}
+        </span>
+        <div className="w-9 h-9" />
+      </div>
 
-      <h1 className="text-xl font-bold text-gray-800 mb-5">
-        {isEditing ? 'Editar convocatoria' : 'Nueva convocatoria'}
-      </h1>
+      <div className="px-5 pt-2 pb-1">
+        <div className="eyebrow mb-1">CONVOCATORIA</div>
+        <h1
+          className="font-display font-extrabold text-daylight-ink"
+          style={{ fontSize: 30, lineHeight: 0.95, letterSpacing: '-1.1px' }}
+        >
+          {isEditing ? <>Editar<br /><span className="text-daylight-pink">convocatoria.</span></> : <>Nueva<br /><span className="text-daylight-pink">convocatoria.</span></>}
+        </h1>
+      </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="px-5 pt-5 flex flex-col gap-4">
         <Field label="Título" hint="Opcional">
-          <input type="text" value={form.title} onChange={set('title')}
+          <input
+            type="text"
+            value={form.title}
+            onChange={set('title')}
             placeholder="Ej: Liga Municipal — Jornada 5"
-            className="input-field" />
+            className="input-field"
+          />
         </Field>
-        <Field label="Fecha" hint="Opcional">
-          <input type="date" value={form.date} onChange={set('date')} className="input-field" />
-        </Field>
-        <Field label="Hora" hint="Opcional">
-          <input type="time" value={form.time} onChange={set('time')} className="input-field" />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Fecha" hint="Opcional">
+            <input type="date" value={form.date} onChange={set('date')} className="input-field" />
+          </Field>
+          <Field label="Hora" hint="Opcional">
+            <input type="time" value={form.time} onChange={set('time')} className="input-field" />
+          </Field>
+        </div>
         <Field label="Lugar" hint="Opcional">
-          <input type="text" value={form.venue} onChange={set('venue')}
+          <input
+            type="text"
+            value={form.venue}
+            onChange={set('venue')}
             placeholder="Ej: Pistas Retiro, Pista 3"
-            className="input-field" />
+            className="input-field"
+          />
         </Field>
         <Field label="Competición" hint="Opcional">
           <div className="relative">
             {selectedCompetition && (
               <span
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full"
-                style={{ backgroundColor: selectedCompetition.color || '#9ca3af' }}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 rounded-sm pointer-events-none"
+                style={{ backgroundColor: selectedCompetition.color || '#FF2D72' }}
               />
             )}
             <select
@@ -123,14 +149,20 @@ export default function MatchdayFormPage() {
           </div>
         </Field>
         <Field label="Ronda" hint="Opcional">
-          <input type="text" value={form.round} onChange={set('round')}
-            placeholder="Ej: Cuartos de final"
-            className="input-field" />
+          <input
+            type="text"
+            value={form.round}
+            onChange={set('round')}
+            placeholder="Ej: 7 ó Cuartos de final"
+            className="input-field"
+          />
         </Field>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && (
+          <p className="text-daylight-red text-sm font-semibold">{error}</p>
+        )}
 
-        <button type="submit" disabled={saving} className="btn-pink w-full py-3 disabled:opacity-50">
+        <button type="submit" disabled={saving} className="btn-pink w-full mt-2">
           {saving ? 'Guardando…' : isEditing ? 'Guardar cambios' : 'Crear convocatoria'}
         </button>
       </form>
@@ -141,8 +173,8 @@ export default function MatchdayFormPage() {
 function Field({ label, hint, children }) {
   return (
     <div>
-      <label className="block text-sm font-semibold text-gray-700 mb-1">
-        {label} {hint && <span className="text-xs font-normal text-gray-400">({hint})</span>}
+      <label className="block font-mono text-[10px] font-medium tracking-[0.15em] uppercase text-daylight-ink-sub mb-1.5">
+        {label}{hint && <span className="text-daylight-ink-sub/60 normal-case ml-1">· {hint}</span>}
       </label>
       {children}
     </div>
