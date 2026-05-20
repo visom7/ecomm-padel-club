@@ -9,7 +9,7 @@ export default function MatchdayFormPage() {
   const isEditing = Boolean(id)
 
   const [form, setForm] = useState({
-    title: '', date: '', time: '', venue: '', competition: '', round: ''
+    title: '', date: '', time: '', venue: '', competition: '', round: '', rivalTeam: ''
   })
   const [competitions, setCompetitions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -28,6 +28,7 @@ export default function MatchdayFormPage() {
             venue: data.venue || '',
             competition: data.competition || '',
             round: data.round || '',
+            rivalTeam: data.rivalTeam || '',
           })
         })
       )
@@ -52,6 +53,7 @@ export default function MatchdayFormPage() {
         venue: form.venue || null,
         competition: form.competition || null,
         round: form.round || null,
+        rivalTeam: form.rivalTeam || null,
       }
       if (isEditing) {
         await updateMatchday(id, payload, pin)
@@ -125,6 +127,15 @@ export default function MatchdayFormPage() {
             value={form.venue}
             onChange={set('venue')}
             placeholder="Ej: Pistas Retiro, Pista 3"
+            className="input-field"
+          />
+        </Field>
+        <Field label="Equipo rival" hint="Opcional">
+          <input
+            type="text"
+            value={form.rivalTeam}
+            onChange={set('rivalTeam')}
+            placeholder="Ej: Padel Club Rivas"
             className="input-field"
           />
         </Field>

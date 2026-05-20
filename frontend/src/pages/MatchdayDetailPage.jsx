@@ -6,9 +6,10 @@ import { useCompetition } from '../context/CompetitionsContext'
 import { getAdminPin } from '../context/adminPin'
 
 const OUTCOME_CONFIG = {
-  WIN:  { label: 'Victoria 🏆', cls: 'bg-daylight-mint-soft text-daylight-mint' },
-  LOSS: { label: 'Derrota 😔',  cls: 'bg-daylight-red-soft text-daylight-red' },
-  DRAW: { label: 'Empate 🤝',   cls: 'bg-gray-100 text-daylight-ink-sub' },
+  WIN:  { label: 'Victoria 🏆',  cls: 'bg-daylight-mint-soft text-daylight-mint' },
+  LOSS: { label: 'Derrota 😔',   cls: 'bg-daylight-red-soft text-daylight-red' },
+  DRAW: { label: 'Empate 🤝',    cls: 'bg-gray-100 text-daylight-ink-sub' },
+  WO:   { label: 'No jugado ⛔', cls: 'bg-gray-100 text-daylight-ink-sub' },
 }
 
 function initials(name) {
@@ -258,6 +259,11 @@ export default function MatchdayDetailPage() {
               {compName}
               {roundLabel && (<><br />{roundLabel}</>)}
             </div>
+            {matchday.rivalTeam && (
+              <div className="text-sm font-semibold text-white/85 mt-1.5">
+                vs {matchday.rivalTeam}
+              </div>
+            )}
             {matchday.matchResult?.outcome && OUTCOME_CONFIG[matchday.matchResult.outcome] && (
               <div className={`inline-block mt-3 text-xs font-bold px-3 py-1 rounded-full ${OUTCOME_CONFIG[matchday.matchResult.outcome].cls}`}>
                 {OUTCOME_CONFIG[matchday.matchResult.outcome].label}

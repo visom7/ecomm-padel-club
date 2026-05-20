@@ -90,6 +90,8 @@ public class PlayerService {
             if (Matchday.Status.PLAYED.equals(matchday.getStatus()) && matchday.getMatchResult() != null) {
                 MatchResult result = matchday.getMatchResult();
                 MatchResult.Outcome outcome = result.getOutcome();
+                // Walkovers don't count for any player
+                if (outcome == MatchResult.Outcome.WO) continue;
                 List<String> finalPlayers = result.getFinalPlayers();
                 if (finalPlayers != null) {
                     for (String playerName : finalPlayers) {

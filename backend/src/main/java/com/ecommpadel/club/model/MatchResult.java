@@ -4,7 +4,7 @@ import java.util.List;
 
 public class MatchResult {
 
-    public enum Outcome { WIN, LOSS, DRAW }
+    public enum Outcome { WIN, LOSS, DRAW, WO }
 
     private Outcome outcome;
     private List<String> finalPlayers;

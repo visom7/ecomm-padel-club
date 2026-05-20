@@ -102,19 +102,24 @@ public class MatchdayService {
     public Matchday registerResult(String id, ResultRequest request) {
         Matchday matchday = findById(id);
 
-        MatchResult result = new MatchResult(
-                request.getOutcome(),
-                request.getFinalPlayers(),
-                request.getPair1(),
-                request.getPair2(),
-                request.getPair3()
-        );
+        boolean isWalkover = request.getOutcome() == MatchResult.Outcome.WO;
+
+        MatchResult result = isWalkover
+                ? new MatchResult(MatchResult.Outcome.WO, List.of(), null, null, null)
+                : new MatchResult(
+                        request.getOutcome(),
+                        request.getFinalPlayers(),
+                        request.getPair1(),
+                        request.getPair2(),
+                        request.getPair3());
         matchday.setMatchResult(result);
         matchday.setStatus(Matchday.Status.PLAYED);
-        log.info("Match result registered: matchdayId={}", id);
+        log.info("Match result registered: matchdayId={}, outcome={}", id, request.getOutcome());
 
-        // Create beer rounds for players who owe one
-        if (request.getBeerRoundPlayers() != null && !request.getBeerRoundPlayers().isEmpty()) {
+        // Create beer rounds for players who owe one (never for walkovers)
+        if (!isWalkover
+                && request.getBeerRoundPlayers() != null
+                && !request.getBeerRoundPlayers().isEmpty()) {
             // Clean up any existing beer rounds for this matchday before re-registering
             beerRoundService.deleteByMatchdayId(id);
             String title = matchday.getTitle() != null ? matchday.getTitle() : "Partido";
@@ -124,7 +129,7 @@ public class MatchdayService {
                 beerRoundService.create(playerId, playerName, id, title);
             }
         } else {
-            // If result is re-submitted with no beer round players, remove old ones
+            // If result is re-submitted with no beer round players (or walkover), remove old ones
             beerRoundService.deleteByMatchdayId(id);
         }
 
@@ -158,6 +163,10 @@ public class MatchdayService {
                     "Matchday must be CLOSED or LIVE to go live, was: " + current);
         }
 
+        if (request.getOutcome() == MatchResult.Outcome.WO) {
+            throw new IllegalStateException("Cannot go LIVE with outcome WO");
+        }
+
         MatchResult result = new MatchResult(
                 request.getOutcome(),
                 request.getFinalPlayers(),
@@ -179,6 +188,7 @@ public class MatchdayService {
         matchday.setVenue(request.getVenue());
         matchday.setCompetition(request.getCompetition());
         matchday.setRound(request.getRound());
+        matchday.setRivalTeam(request.getRivalTeam());
     }
 
     private void sortRegistrations(Matchday matchday) {

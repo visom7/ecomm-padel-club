@@ -159,4 +159,46 @@ class CompetitionServiceTest {
         assertThat(response.getPlayers().get(0).getGanados()).isEqualTo(1);
         assertThat(response.getPlayers().get(0).getApuntados()).isEqualTo(1);
     }
+
+    @Test
+    void getStats_walkoverDoesNotCountTowardsTotalsOrPlayerStats() {
+        Competition competition = new Competition();
+        competition.setId("comp1");
+        competition.setName("Liga Test");
+
+        PlayerResponse registration = new PlayerResponse("p1", "Ana", PlayerResponse.Availability.AVAILABLE);
+
+        // A real win for Ana
+        MatchResult win = new MatchResult();
+        win.setOutcome(MatchResult.Outcome.WIN);
+        win.setFinalPlayers(List.of("Ana"));
+        Matchday winMatchday = new Matchday();
+        winMatchday.setStatus(Matchday.Status.PLAYED);
+        winMatchday.setMatchResult(win);
+        winMatchday.setRegistrations(List.of(registration));
+
+        // A walkover where Ana is registered but didn't play
+        MatchResult walkover = new MatchResult();
+        walkover.setOutcome(MatchResult.Outcome.WO);
+        walkover.setFinalPlayers(List.of());
+        Matchday woMatchday = new Matchday();
+        woMatchday.setStatus(Matchday.Status.PLAYED);
+        woMatchday.setMatchResult(walkover);
+        woMatchday.setRegistrations(List.of(registration));
+
+        when(competitionRepository.findById("comp1")).thenReturn(Optional.of(competition));
+        when(matchdayRepository.findByCompetition("comp1")).thenReturn(List.of(winMatchday, woMatchday));
+
+        CompetitionStatsResponse response = competitionService.getStats("comp1");
+
+        assertThat(response.getTotalWins()).isEqualTo(1);
+        assertThat(response.getTotalLosses()).isEqualTo(0);
+        assertThat(response.getTotalDraws()).isEqualTo(0);
+        // Ana is apuntada in both matchdays, but only jugados once (the WO doesn't count)
+        assertThat(response.getPlayers()).hasSize(1);
+        assertThat(response.getPlayers().get(0).getApuntados()).isEqualTo(2);
+        assertThat(response.getPlayers().get(0).getJugados()).isEqualTo(1);
+        assertThat(response.getPlayers().get(0).getGanados()).isEqualTo(1);
+        assertThat(response.getPlayers().get(0).getPerdidos()).isEqualTo(0);
+    }
 }

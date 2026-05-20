@@ -5,9 +5,10 @@ import { useCompetition } from '../context/CompetitionsContext'
 import { useSession } from '../context/SessionContext'
 
 const OUTCOME_BADGE = {
-  WIN:  { label: 'VICTORIA', cls: 'bg-daylight-mint-soft text-daylight-mint' },
-  LOSS: { label: 'DERROTA',  cls: 'bg-daylight-red-soft text-daylight-red' },
-  DRAW: { label: 'EMPATE',   cls: 'bg-gray-100 text-daylight-ink-sub' },
+  WIN:  { label: 'VICTORIA',  cls: 'bg-daylight-mint-soft text-daylight-mint' },
+  LOSS: { label: 'DERROTA',   cls: 'bg-daylight-red-soft text-daylight-red' },
+  DRAW: { label: 'EMPATE',    cls: 'bg-gray-100 text-daylight-ink-sub' },
+  WO:   { label: 'NO JUGADO', cls: 'bg-gray-100 text-daylight-ink-sub' },
 }
 
 export default function PlayedMatchesPage() {
@@ -96,7 +97,7 @@ export default function PlayedMatchesPage() {
 }
 
 function PlayedMatchCard({ match, onClick }) {
-  const { title, date, venue, competition, matchResult } = match
+  const { title, date, venue, competition, rivalTeam, matchResult } = match
   const competitionData = useCompetition(competition)
   const competitionLabel = competitionData?.name
     ?? (competition && !competition.includes('-') ? competition : null)
@@ -128,6 +129,11 @@ function PlayedMatchCard({ match, onClick }) {
           <h2 className="font-display font-bold text-[19px] leading-tight tracking-[-0.4px] text-daylight-ink truncate">
             {title || 'Partido'}
           </h2>
+          {rivalTeam && (
+            <p className="text-xs font-semibold text-daylight-ink-sub mt-0.5 truncate">
+              vs {rivalTeam}
+            </p>
+          )}
           {(formattedDate || venue) && (
             <p className="text-xs text-daylight-ink-sub mt-1.5 truncate">
               {formattedDate && <span className="font-semibold text-daylight-ink">{formattedDate}</span>}

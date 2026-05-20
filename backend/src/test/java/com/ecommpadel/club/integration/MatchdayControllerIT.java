@@ -173,6 +173,54 @@ class MatchdayControllerIT extends AbstractIntegrationTest {
     }
 
     @Test
+    void registerResult_walkover_returns200() {
+        String id = createMatchday();
+
+        given()
+            .contentType(ContentType.JSON)
+            .header("X-Admin-Pin", VALID_PIN)
+            .body(Map.of(
+                "outcome", "WO",
+                "finalPlayers", new String[]{}
+            ))
+        .when()
+            .post("/api/matchdays/{id}/result", id)
+        .then()
+            .statusCode(200)
+            .body("status", equalTo("PLAYED"))
+            .body("matchResult.outcome", equalTo("WO"));
+    }
+
+    @Test
+    void createMatchday_persistsRivalTeam() {
+        String id = given()
+            .contentType(ContentType.JSON)
+            .header("X-Admin-Pin", VALID_PIN)
+            .body(Map.of(
+                "title", "Liga con rival",
+                "date", "2026-05-12",
+                "time", "20:00",
+                "venue", "Pista 1",
+                "competition", "comp1",
+                "round", "3",
+                "rivalTeam", "Padel Club Rivas"
+            ))
+        .when()
+            .post("/api/matchdays")
+        .then()
+            .statusCode(201)
+            .body("rivalTeam", equalTo("Padel Club Rivas"))
+            .extract().path("id");
+
+        given()
+        .when()
+            .get("/api/matchdays/{id}", id)
+        .then()
+            .statusCode(200)
+            .body("rivalTeam", equalTo("Padel Club Rivas"));
+    }
+
+    @Test
     void deleteMatchday_returns204_withValidPin() {
         String id = createMatchday();
 

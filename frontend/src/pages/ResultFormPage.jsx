@@ -6,9 +6,10 @@ import { getAdminPin } from '../context/adminPin'
 const EMPTY_PAIR = { sets: [{ gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }, { gamesHome: '', gamesAway: '' }] }
 
 const OUTCOMES = [
-  { value: 'WIN',  label: 'Ganamos',  emoji: '🏆', active: 'bg-daylight-mint text-white border-daylight-mint',  inactive: 'border-daylight-mint-soft text-daylight-mint bg-daylight-mint-soft/50' },
-  { value: 'LOSS', label: 'Perdimos', emoji: '😔', active: 'bg-daylight-red text-white border-daylight-red',    inactive: 'border-daylight-red-soft text-daylight-red bg-daylight-red-soft/50' },
-  { value: 'DRAW', label: 'Empate',   emoji: '🤝', active: 'bg-daylight-ink text-white border-daylight-ink',    inactive: 'border-daylight-hair text-daylight-ink-sub' },
+  { value: 'WIN',  label: 'Ganamos',   emoji: '🏆', active: 'bg-daylight-mint text-white border-daylight-mint',           inactive: 'border-daylight-mint-soft text-daylight-mint bg-daylight-mint-soft/50' },
+  { value: 'LOSS', label: 'Perdimos',  emoji: '😔', active: 'bg-daylight-red text-white border-daylight-red',             inactive: 'border-daylight-red-soft text-daylight-red bg-daylight-red-soft/50' },
+  { value: 'DRAW', label: 'Empate',    emoji: '🤝', active: 'bg-daylight-ink text-white border-daylight-ink',             inactive: 'border-daylight-hair text-daylight-ink-sub' },
+  { value: 'WO',   label: 'No jugado', emoji: '⛔', active: 'bg-daylight-ink-sub text-white border-daylight-ink-sub',     inactive: 'border-daylight-hair text-daylight-ink-sub bg-daylight-cream/50' },
 ]
 
 function initials(name) {
@@ -95,7 +96,8 @@ export default function ResultFormPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (finalPlayers.length !== 6) {
+    const isWO = outcome === 'WO'
+    if (!isWO && finalPlayers.length !== 6) {
       setError('Debes seleccionar exactamente 6 jugadores')
       return
     }
@@ -106,14 +108,24 @@ export default function ResultFormPage() {
           .filter(s => s.gamesHome !== '' && s.gamesAway !== '')
           .map(s => ({ gamesHome: Number(s.gamesHome), gamesAway: Number(s.gamesAway) }))
       })
-      await submitResult(id, {
-        outcome,
-        finalPlayers,
-        beerRoundPlayers: showBeerSection ? beerRoundPlayers : [],
-        pair1: buildPair(pairs[0]),
-        pair2: buildPair(pairs[1]),
-        pair3: buildPair(pairs[2]),
-      }, getAdminPin())
+      const payload = isWO
+        ? {
+            outcome: 'WO',
+            finalPlayers: [],
+            beerRoundPlayers: [],
+            pair1: { sets: [] },
+            pair2: { sets: [] },
+            pair3: { sets: [] },
+          }
+        : {
+            outcome,
+            finalPlayers,
+            beerRoundPlayers: showBeerSection ? beerRoundPlayers : [],
+            pair1: buildPair(pairs[0]),
+            pair2: buildPair(pairs[1]),
+            pair3: buildPair(pairs[2]),
+          }
+      await submitResult(id, payload, getAdminPin())
       navigate(`/matchdays/${id}`)
     } catch (err) {
       handleAdminError(err, navigate, setError)
@@ -129,6 +141,7 @@ export default function ResultFormPage() {
   )
 
   const isEditing = Boolean(matchday?.matchResult)
+  const isWO = outcome === 'WO'
   const finalsComplete = finalPlayers.length === 6
   const finalsRemaining = 6 - finalPlayers.length
 
@@ -183,6 +196,7 @@ export default function ResultFormPage() {
         </div>
 
         {/* Final players */}
+        {!isWO && (
         <div className="card">
           <div className="flex items-center justify-between mb-3">
             <div className="eyebrow">¿QUIÉN JUGÓ?</div>
@@ -234,9 +248,10 @@ export default function ResultFormPage() {
             </p>
           )}
         </div>
+        )}
 
         {/* Pairs */}
-        {pairs.map((pair, pairIdx) => (
+        {!isWO && pairs.map((pair, pairIdx) => (
           <div key={pairIdx} className="card">
             <div className="eyebrow mb-3">PAREJA {pairIdx + 1}</div>
             <div className="flex flex-col gap-2">
@@ -276,6 +291,7 @@ export default function ResultFormPage() {
         ))}
 
         {/* Beer round */}
+        {!isWO && (
         <div className="card">
           <div className="flex items-center justify-between">
             <div className="eyebrow">🍺 ¿ALGUIEN PAGA CUBO?</div>
@@ -336,6 +352,7 @@ export default function ResultFormPage() {
             </p>
           )}
         </div>
+        )}
 
         {error && (
           <p className="text-daylight-red text-sm font-semibold">{error}</p>
@@ -343,7 +360,7 @@ export default function ResultFormPage() {
 
         <button
           type="submit"
-          disabled={saving || !finalsComplete}
+          disabled={saving || (!isWO && !finalsComplete)}
           className="btn-pink w-full"
         >
           {saving ? 'Guardando…' : 'Guardar resultado'}

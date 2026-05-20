@@ -18,6 +18,7 @@ public class MatchdayRequest {
     private String venue;
     private String competition;
     private String round;
+    private String rivalTeam;
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
@@ -36,4 +37,7 @@ public class MatchdayRequest {
 
     public String getRound() { return round; }
     public void setRound(String round) { this.round = round; }
+
+    public String getRivalTeam() { return rivalTeam; }
+    public void setRivalTeam(String rivalTeam) { this.rivalTeam = rivalTeam; }
 }

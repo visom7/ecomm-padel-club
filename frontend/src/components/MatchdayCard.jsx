@@ -11,7 +11,7 @@ const STATUS_BADGE = {
 }
 
 export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDelete, onRespond }) {
-  const { title, status, date, time, venue, competition, round } = matchday
+  const { title, status, date, time, venue, competition, round, rivalTeam } = matchday
   const registrations = matchday.registrations || []
   const available = registrations.filter(r => r.availability === 'AVAILABLE').length
   const totalResponded = registrations.length
@@ -72,6 +72,11 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
           <h2 className="font-display font-bold text-[19px] leading-tight tracking-[-0.4px] text-daylight-ink truncate">
             {title || 'Convocatoria'}
           </h2>
+          {rivalTeam && (
+            <p className="text-xs font-semibold text-daylight-ink-sub mt-0.5 truncate">
+              vs {rivalTeam}
+            </p>
+          )}
           {(formattedDate || time || venue) && (
             <p className="text-xs text-daylight-ink-sub mt-1.5 truncate">
               {formattedDate && (

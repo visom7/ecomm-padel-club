@@ -4,6 +4,7 @@ import com.ecommpadel.club.dto.MatchdayRequest;
 import com.ecommpadel.club.dto.ResponseRequest;
 import com.ecommpadel.club.dto.ResultRequest;
 import com.ecommpadel.club.model.Matchday;
+import com.ecommpadel.club.model.MatchResult;
 import com.ecommpadel.club.model.PairResult;
 import com.ecommpadel.club.model.PlayerResponse;
 import com.ecommpadel.club.repository.MatchdayRepository;
@@ -49,6 +50,7 @@ class MatchdayServiceTest {
         MatchdayRequest request = new MatchdayRequest();
         request.setTitle("Liga Test");
         request.setVenue("Pistas Retiro");
+        request.setRivalTeam("Padel Club Rivas");
 
         when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -56,6 +58,7 @@ class MatchdayServiceTest {
 
         assertThat(result.getTitle()).isEqualTo("Liga Test");
         assertThat(result.getVenue()).isEqualTo("Pistas Retiro");
+        assertThat(result.getRivalTeam()).isEqualTo("Padel Club Rivas");
         assertThat(result.getStatus()).isEqualTo(Matchday.Status.OPEN);
         verify(matchdayRepository).save(any(Matchday.class));
     }
@@ -137,6 +140,31 @@ class MatchdayServiceTest {
         assertThat(result.getStatus()).isEqualTo(Matchday.Status.PLAYED);
         assertThat(result.getMatchResult()).isNotNull();
         assertThat(result.getMatchResult().getFinalPlayers()).contains("Ernesto");
+    }
+
+    @Test
+    void registerResult_walkoverPersistsEmptyPlayersAndSkipsBeerRounds() {
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(openMatchday));
+        when(matchdayRepository.save(any(Matchday.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ResultRequest request = new ResultRequest();
+        request.setOutcome(MatchResult.Outcome.WO);
+        // Even if the client sends data, walkover must ignore it
+        request.setFinalPlayers(List.of("Ernesto", "Jorge"));
+        request.setBeerRoundPlayers(List.of("Ernesto"));
+        request.setPair1(new PairResult());
+
+        Matchday result = matchdayService.registerResult("matchday-1", request);
+
+        assertThat(result.getStatus()).isEqualTo(Matchday.Status.PLAYED);
+        assertThat(result.getMatchResult()).isNotNull();
+        assertThat(result.getMatchResult().getOutcome()).isEqualTo(MatchResult.Outcome.WO);
+        assertThat(result.getMatchResult().getFinalPlayers()).isEmpty();
+        assertThat(result.getMatchResult().getPair1()).isNull();
+        assertThat(result.getMatchResult().getPair2()).isNull();
+        assertThat(result.getMatchResult().getPair3()).isNull();
+        verify(beerRoundService).deleteByMatchdayId("matchday-1");
+        verify(beerRoundService, never()).create(any(), any(), any(), any());
     }
 
     @Test
@@ -268,6 +296,22 @@ class MatchdayServiceTest {
         assertThatThrownBy(() -> matchdayService.goLive("matchday-1", request))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("CLOSED or LIVE");
+    }
+
+    @Test
+    void goLive_rejectsWalkoverOutcome() {
+        Matchday closed = new Matchday();
+        closed.setId("matchday-1");
+        closed.setStatus(Matchday.Status.CLOSED);
+
+        when(matchdayRepository.findById("matchday-1")).thenReturn(Optional.of(closed));
+
+        ResultRequest request = new ResultRequest();
+        request.setOutcome(MatchResult.Outcome.WO);
+
+        assertThatThrownBy(() -> matchdayService.goLive("matchday-1", request))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("WO");
     }
 
     @Test

@@ -27,6 +27,7 @@ public class Matchday {
     private String venue;
     private String competition;
     private String round;
+    private String rivalTeam;
     private LocalDateTime createdAt = LocalDateTime.now();
     private List<PlayerResponse> registrations = new ArrayList<>();
     private MatchResult matchResult;
@@ -64,6 +65,9 @@ public class Matchday {
 
     public String getRound() { return round; }
     public void setRound(String round) { this.round = round; }
+
+    public String getRivalTeam() { return rivalTeam; }
+    public void setRivalTeam(String rivalTeam) { this.rivalTeam = rivalTeam; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

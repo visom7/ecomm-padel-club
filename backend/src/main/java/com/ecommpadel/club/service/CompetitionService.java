@@ -88,6 +88,9 @@ public class CompetitionService {
                 MatchResult result = matchday.getMatchResult();
                 MatchResult.Outcome outcome = result.getOutcome();
 
+                // Walkovers don't count: no totals, no per-player stats
+                if (outcome == MatchResult.Outcome.WO) continue;
+
                 if (outcome == MatchResult.Outcome.WIN) totalWins++;
                 else if (outcome == MatchResult.Outcome.LOSS) totalLosses++;
                 else if (outcome == MatchResult.Outcome.DRAW) totalDraws++;
