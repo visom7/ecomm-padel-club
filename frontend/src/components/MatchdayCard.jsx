@@ -19,6 +19,10 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
   const competitionData = useCompetition(competition)
   const [responding, setResponding] = useState(false)
 
+  const isExcluded = session?.playerId
+    ? (competitionData?.excludedPlayerIds || []).includes(session.playerId)
+    : false
+
   const myResponse = session?.playerId
     ? registrations.find(r => r.playerId === session.playerId)?.availability
     : null
@@ -99,7 +103,7 @@ export default function MatchdayCard({ matchday, isAdmin, onClick, onEdit, onDel
         </div>
       </div>
 
-      {isOpen && session?.playerId && (
+      {isOpen && session?.playerId && !isExcluded && (
         <div
           className="mt-3.5 pt-3.5 border-t border-dashed border-daylight-hair"
           onClick={e => e.stopPropagation()}

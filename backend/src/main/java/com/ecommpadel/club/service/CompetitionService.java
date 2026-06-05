@@ -66,6 +66,11 @@ public class CompetitionService {
         Competition competition = findById(competitionId);
         List<Matchday> matchdays = matchdayRepository.findByCompetition(competitionId);
 
+        Set<String> excluded = new HashSet<>(
+                competition.getExcludedPlayerIds() != null
+                        ? competition.getExcludedPlayerIds()
+                        : new ArrayList<>());
+
         // Accumulate stats per player: playerId -> [apuntados, jugados, ganados, perdidos, name]
         Map<String, int[]> statsMap = new LinkedHashMap<>();
         Map<String, String> playerNames = new LinkedHashMap<>();
@@ -77,6 +82,7 @@ public class CompetitionService {
             for (PlayerResponse reg : matchday.getRegistrations()) {
                 if (PlayerResponse.Availability.AVAILABLE.equals(reg.getAvailability())) {
                     String pid = reg.getPlayerId();
+                    if (excluded.contains(pid)) continue;
                     statsMap.computeIfAbsent(pid, k -> new int[4]);
                     playerNames.put(pid, reg.getName());
                     statsMap.get(pid)[0]++; // apuntados
@@ -98,7 +104,9 @@ public class CompetitionService {
                 List<String> finalPlayers = result.getFinalPlayers();
                 if (finalPlayers != null) {
                     for (String playerName : finalPlayers) {
-                        String pid = findPlayerIdByName(playerName, matchday.getRegistrations());
+                        String resolvedId = findPlayerIdByName(playerName, matchday.getRegistrations());
+                        if (resolvedId != null && excluded.contains(resolvedId)) continue;
+                        String pid = resolvedId;
                         if (pid == null) {
                             pid = "name:" + playerName;
                         }
@@ -137,5 +145,9 @@ public class CompetitionService {
         competition.setName(request.getName());
         competition.setColor(request.getColor());
         competition.setActive(request.isActive());
+        competition.setExcludedPlayerIds(
+                request.getExcludedPlayerIds() != null
+                        ? request.getExcludedPlayerIds()
+                        : new ArrayList<>());
     }
 }

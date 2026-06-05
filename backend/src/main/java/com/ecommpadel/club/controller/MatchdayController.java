@@ -89,6 +89,8 @@ public class MatchdayController {
             return ResponseEntity.ok(matchdayService.registerResponse(id, request));
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
     }
 

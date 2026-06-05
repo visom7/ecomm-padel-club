@@ -85,6 +85,21 @@ export default function MatchdayDetailPage() {
     }
   }
 
+  const handleSetFor = async (player, availability) => {
+    if (responding) return
+    setResponding(true)
+    try {
+      const updated = await respondToMatchday(id, {
+        playerId: player.id,
+        name: player.name,
+        availability,
+      })
+      setMatchday(updated)
+    } finally {
+      setResponding(false)
+    }
+  }
+
   const handleClose = async () => {
     if (!confirm('¿Cerrar esta convocatoria?')) return
     try {
@@ -122,10 +137,13 @@ export default function MatchdayDetailPage() {
   )
   if (!matchday) return <p className="text-center pt-20 text-daylight-ink-sub">Convocatoria no encontrada</p>
 
-  const available = matchday.registrations.filter(r => r.availability === 'AVAILABLE')
-  const unavailable = matchday.registrations.filter(r => r.availability === 'UNAVAILABLE')
+  const excludedIds = new Set(competitionData?.excludedPlayerIds || [])
+  const available = matchday.registrations.filter(r => r.availability === 'AVAILABLE' && !excludedIds.has(r.playerId))
+  const unavailable = matchday.registrations.filter(r => r.availability === 'UNAVAILABLE' && !excludedIds.has(r.playerId))
   const respondedIds = new Set(matchday.registrations.map(r => r.playerId))
-  const noResponse = allPlayers.filter(p => !respondedIds.has(p.id))
+  const noResponse = allPlayers.filter(p => !respondedIds.has(p.id) && !excludedIds.has(p.id))
+  const isAdmin = Boolean(session?.isAdmin)
+  const amExcluded = excludedIds.has(session?.playerId)
   const isOpen = matchday.status === 'OPEN'
   const isLive = matchday.status === 'LIVE'
   const isPlayed = matchday.status === 'PLAYED'
@@ -282,8 +300,18 @@ export default function MatchdayDetailPage() {
         </div>
       </div>
 
+      {/* Excluded notice */}
+      {isOpen && session?.playerId && amExcluded && (
+        <div className="px-4 pt-5 pb-1.5">
+          <div className="card flex items-center gap-2.5 text-daylight-ink-sub">
+            <span className="text-base">🚫</span>
+            <span className="text-sm font-semibold">No participas en esta competición.</span>
+          </div>
+        </div>
+      )}
+
       {/* Apuntarse — the moment */}
-      {isOpen && session?.playerId && (
+      {isOpen && session?.playerId && !amExcluded && (
         <div className="px-4 pt-5 pb-1.5">
           <div className="eyebrow mb-2">¿VAS A IR?</div>
           {myResponse === 'AVAILABLE' ? (
@@ -391,6 +419,13 @@ export default function MatchdayDetailPage() {
                       TÚ
                     </span>
                   )}
+                  {isAdmin && isOpen && (
+                    <AdminAttendance
+                      current="AVAILABLE"
+                      disabled={responding}
+                      onSet={a => handleSetFor({ id: r.playerId, name: r.name }, a)}
+                    />
+                  )}
                 </div>
               )
             })}
@@ -405,6 +440,13 @@ export default function MatchdayDetailPage() {
                 <div key={r.playerId} className="player-chip player-chip-out">
                   <div className="player-chip-avatar">{initials(r.name)}</div>
                   {r.name}
+                  {isAdmin && isOpen && (
+                    <AdminAttendance
+                      current="UNAVAILABLE"
+                      disabled={responding}
+                      onSet={a => handleSetFor({ id: r.playerId, name: r.name }, a)}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -419,6 +461,13 @@ export default function MatchdayDetailPage() {
                 <div key={p.id} className="player-chip player-chip-pending">
                   <div className="player-chip-avatar">{initials(p.name)}</div>
                   {p.name}
+                  {isAdmin && (
+                    <AdminAttendance
+                      current={null}
+                      disabled={responding}
+                      onSet={a => handleSetFor({ id: p.id, name: p.name }, a)}
+                    />
+                  )}
                 </div>
               ))}
             </div>
@@ -436,6 +485,38 @@ function HeroStat({ label, value, sub }) {
       <div className="font-display font-bold text-[17px] tracking-[-0.3px] mt-1 truncate">{value}</div>
       {sub && <div className="text-[11px] opacity-60 mt-0.5 truncate">{sub}</div>}
     </div>
+  )
+}
+
+function AdminAttendance({ current, onSet, disabled }) {
+  const base = 'w-6 h-6 flex items-center justify-center rounded-md text-[11px] font-bold leading-none transition-colors disabled:opacity-40'
+  return (
+    <span className="flex items-center gap-1 ml-1.5 pl-1.5 border-l border-daylight-hair">
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={e => { e.stopPropagation(); onSet('AVAILABLE') }}
+        aria-label="Marcar disponible"
+        aria-pressed={current === 'AVAILABLE'}
+        className={base + (current === 'AVAILABLE'
+          ? ' bg-daylight-mint text-white'
+          : ' bg-daylight-mint-soft text-daylight-mint')}
+      >
+        ✓
+      </button>
+      <button
+        type="button"
+        disabled={disabled}
+        onClick={e => { e.stopPropagation(); onSet('UNAVAILABLE') }}
+        aria-label="Marcar no disponible"
+        aria-pressed={current === 'UNAVAILABLE'}
+        className={base + (current === 'UNAVAILABLE'
+          ? ' bg-daylight-red text-white'
+          : ' bg-daylight-red-soft text-daylight-red')}
+      >
+        ✕
+      </button>
+    </span>
   )
 }
 

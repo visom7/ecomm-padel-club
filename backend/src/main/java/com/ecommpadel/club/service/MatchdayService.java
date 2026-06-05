@@ -6,7 +6,9 @@ import com.ecommpadel.club.dto.ResultRequest;
 import com.ecommpadel.club.model.BeerRound;
 import com.ecommpadel.club.model.Matchday;
 import com.ecommpadel.club.model.MatchResult;
+import com.ecommpadel.club.model.Competition;
 import com.ecommpadel.club.model.PlayerResponse;
+import com.ecommpadel.club.repository.CompetitionRepository;
 import com.ecommpadel.club.repository.MatchdayRepository;
 import com.ecommpadel.club.service.BeerRoundService;
 import org.slf4j.Logger;
@@ -25,10 +27,14 @@ public class MatchdayService {
 
     private final MatchdayRepository matchdayRepository;
     private final BeerRoundService beerRoundService;
+    private final CompetitionRepository competitionRepository;
 
-    public MatchdayService(MatchdayRepository matchdayRepository, BeerRoundService beerRoundService) {
+    public MatchdayService(MatchdayRepository matchdayRepository,
+                           BeerRoundService beerRoundService,
+                           CompetitionRepository competitionRepository) {
         this.matchdayRepository = matchdayRepository;
         this.beerRoundService = beerRoundService;
+        this.competitionRepository = competitionRepository;
     }
 
     public List<Matchday> findActive() {
@@ -80,6 +86,16 @@ public class MatchdayService {
 
     public Matchday registerResponse(String id, ResponseRequest request) {
         Matchday matchday = findById(id);
+
+        String competitionId = matchday.getCompetition();
+        if (competitionId != null && !competitionId.isBlank()) {
+            Competition competition = competitionRepository.findById(competitionId).orElse(null);
+            if (competition != null
+                    && competition.getExcludedPlayerIds() != null
+                    && competition.getExcludedPlayerIds().contains(request.getPlayerId())) {
+                throw new IllegalStateException("Jugador excluido de esta competición");
+            }
+        }
 
         matchday.getRegistrations().removeIf(
                 r -> r.getPlayerId().equals(request.getPlayerId())

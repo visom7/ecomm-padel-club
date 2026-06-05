@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { getCompetitions, createCompetition, updateCompetition, handleAdminError } from '../services/api'
+import { getCompetitions, createCompetition, updateCompetition, getPlayers, handleAdminError } from '../services/api'
 import { getAdminPin } from '../context/adminPin'
 
 const PRESET_COLORS = [
@@ -14,26 +14,55 @@ const PRESET_COLORS = [
   '#A16207', // bronze
 ]
 
+function initials(name) {
+  if (!name) return '··'
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map(p => p[0].toUpperCase())
+    .join('')
+}
+
 export default function CompetitionFormPage() {
   const { id } = useParams()
   const navigate = useNavigate()
   const isEditing = Boolean(id)
 
-  const [form, setForm] = useState({ name: '', color: '#FF2D72', active: true })
+  const [form, setForm] = useState({ name: '', color: '#FF2D72', active: true, excludedPlayerIds: [] })
+  const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(isEditing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState(null)
+
+  useEffect(() => {
+    getPlayers().then(setPlayers).catch(() => {})
+  }, [])
 
   useEffect(() => {
     if (!isEditing) return
     getCompetitions().then(list => {
       const comp = list.find(c => c.id === id)
       if (comp) {
-        setForm({ name: comp.name || '', color: comp.color || '#FF2D72', active: comp.active !== false })
+        setForm({
+          name: comp.name || '',
+          color: comp.color || '#FF2D72',
+          active: comp.active !== false,
+          excludedPlayerIds: comp.excludedPlayerIds || [],
+        })
       }
       setLoading(false)
     })
   }, [id, isEditing])
+
+  const toggleExcluded = (playerId) => {
+    setForm(f => ({
+      ...f,
+      excludedPlayerIds: f.excludedPlayerIds.includes(playerId)
+        ? f.excludedPlayerIds.filter(pid => pid !== playerId)
+        : [...f.excludedPlayerIds, playerId],
+    }))
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -45,7 +74,7 @@ export default function CompetitionFormPage() {
     setError(null)
     try {
       const pin = getAdminPin()
-      const payload = { name: form.name.trim(), color: form.color, active: form.active }
+      const payload = { name: form.name.trim(), color: form.color, active: form.active, excludedPlayerIds: form.excludedPlayerIds }
       if (isEditing) {
         await updateCompetition(id, payload, pin)
       } else {
@@ -173,9 +202,46 @@ export default function CompetitionFormPage() {
             aria-label={form.active ? 'Cerrar competición' : 'Reabrir competición'}
           >
             <span
-              className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-6' : 'translate-x-0.5'}`}
+              className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${form.active ? 'translate-x-[22px]' : 'translate-x-0'}`}
             />
           </button>
+        </div>
+
+        {/* Excluded players */}
+        <div className="border-t border-daylight-hair pt-4">
+          <label className="block font-mono text-[10px] font-medium tracking-[0.15em] uppercase text-daylight-ink-sub mb-1.5">
+            Jugadores excluidos
+          </label>
+          <p className="text-xs text-daylight-ink-sub mb-3">
+            Los excluidos no podrán apuntarse ni contarán en las stats de esta competición.
+          </p>
+          {players.length === 0 ? (
+            <p className="text-sm text-daylight-ink-sub">No hay jugadores.</p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              {players.map(p => {
+                const excluded = form.excludedPlayerIds.includes(p.id)
+                return (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => toggleExcluded(p.id)}
+                    aria-pressed={excluded}
+                    className={
+                      'player-chip transition-colors ' +
+                      (excluded ? 'player-chip-out' : '')
+                    }
+                  >
+                    <span className="player-chip-avatar">{initials(p.name)}</span>
+                    {p.name}
+                    <span className="font-mono text-[8px] ml-0.5 tracking-wider">
+                      {excluded ? '✕' : '+'}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
         </div>
 
         {error && (

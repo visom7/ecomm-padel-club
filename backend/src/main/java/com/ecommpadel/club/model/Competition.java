@@ -4,6 +4,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Document(collection = "competitions")
 public class Competition {
@@ -14,6 +16,7 @@ public class Competition {
     private String color;
     private boolean active = true;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private List<String> excludedPlayerIds = new ArrayList<>();
 
     public Competition() {}
 
@@ -31,4 +34,7 @@ public class Competition {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public List<String> getExcludedPlayerIds() { return excludedPlayerIds; }
+    public void setExcludedPlayerIds(List<String> excludedPlayerIds) { this.excludedPlayerIds = excludedPlayerIds; }
 }
