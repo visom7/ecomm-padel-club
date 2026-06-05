@@ -192,6 +192,9 @@ export default function LiveScorePage() {
   }
 
   const togglePlayer = (name) => {
+    // Selecting players makes this admin the source of truth: stop hydrating from
+    // the server, otherwise the next poll tick clobbers the in-progress selection.
+    hasLocalEditsRef.current = true
     setFinalPlayers(prev => {
       const next = prev.includes(name) ? prev.filter(n => n !== name) : prev.length < 6 ? [...prev, name] : prev
       return next
@@ -199,6 +202,7 @@ export default function LiveScorePage() {
   }
 
   const movePlayer = (idx, dir) => {
+    hasLocalEditsRef.current = true
     setFinalPlayers(prev => {
       const j = idx + dir
       if (j < 0 || j >= prev.length) return prev
